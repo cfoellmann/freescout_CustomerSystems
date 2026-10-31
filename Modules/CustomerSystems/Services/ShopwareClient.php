@@ -50,6 +50,14 @@ class ShopwareClient
         return array_values($customers);
     }
 
+    public function testConnection()
+    {
+        $response = $this->get('customers', ['limit' => 1, 'start' => 0]);
+        if (!is_array($response['data'])) {
+            throw new RuntimeException('invalid_response');
+        }
+    }
+
     private function get($path, array $query)
     {
         $response = call_user_func($this->request, $path, $query);

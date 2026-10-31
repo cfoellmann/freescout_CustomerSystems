@@ -4,9 +4,9 @@ namespace Modules\CustomerSystems\Http\Controllers;
 
 use App\Conversation;
 use Illuminate\Routing\Controller;
-use Modules\CustomerSystems\Services\ShopwareClient;
-use Modules\CustomerSystems\Services\ShopwareTransport;
 use Modules\CustomerSystems\Services\BackendLink;
+use Modules\CustomerSystems\Services\ConnectionSettings;
+use Modules\CustomerSystems\Services\CustomerConnection;
 
 class SidebarController extends Controller
 {
@@ -22,16 +22,20 @@ class SidebarController extends Controller
             $error = 'no_email';
         } else {
             try {
-                $client = new ShopwareClient(new ShopwareTransport(config('customersystems.shopware', [])));
+                $settings = (new ConnectionSettings())->load($conversation->mailbox);
+                if (empty($settings['enabled'])) {
+                    throw new \RuntimeException('disabled');
+                }
+                $client = CustomerConnection::client($settings);
                 $customers = $client->findByEmail($email);
                 foreach ($customers as &$customer) {
                     $customer['backend_url'] = BackendLink::customer(
-                        config('customersystems.shopware.backend_url', ''), $customer['id']
+                        $settings['backend_url'], $customer['id'], $settings['type']
                     );
                 }
                 unset($customer);
             } catch (\Throwable $exception) {
-                $known = ['not_configured', 'curl_missing', 'too_many_matches', 'invalid_response', 'unavailable'];
+                $known = ['disabled', 'credentials_unreadable', 'authentication_failed', 'permission_denied', 'not_configured', 'curl_missing', 'too_many_matches', 'invalid_response', 'unavailable'];
                 $error = in_array($exception->getMessage(), $known, true)
                     ? $exception->getMessage() : 'unavailable';
                 \Log::warning('Customer Systems: Shopware lookup failed', ['reason' => $error]);

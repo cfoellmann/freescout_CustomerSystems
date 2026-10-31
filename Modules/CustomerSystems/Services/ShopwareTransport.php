@@ -55,6 +55,12 @@ class ShopwareTransport
         $ok = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         curl_close($handle);
+        if ($ok !== false && $status === 401) {
+            throw new RuntimeException('authentication_failed');
+        }
+        if ($ok !== false && $status === 403) {
+            throw new RuntimeException('permission_denied');
+        }
         if ($ok === false || $status !== 200) {
             throw new RuntimeException('unavailable');
         }

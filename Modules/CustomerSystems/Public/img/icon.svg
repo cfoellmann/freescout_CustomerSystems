@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Kundenprofil Abruf</title>
+  <rect width="256" height="256" rx="48" fill="#173b58"/>
+  <rect x="43" y="47" width="148" height="164" rx="18" fill="#f4f8fb"/>
+  <circle cx="117" cy="100" r="23" fill="#267b99"/>
+  <path d="M76 158c0-23 18-37 41-37s41 14 41 37" fill="#267b99"/>
+  <path d="M76 180h49" stroke="#9ab3c4" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="184" cy="179" r="39" fill="#55d5bd" stroke="#173b58" stroke-width="8"/>
+  <circle cx="181" cy="175" r="14" fill="none" stroke="#173b58" stroke-width="7"/>
+  <path d="m192 186 12 12" stroke="#173b58" stroke-width="8" stroke-linecap="round"/>
+</svg>

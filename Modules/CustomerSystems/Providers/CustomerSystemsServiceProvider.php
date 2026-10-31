@@ -18,8 +18,15 @@ class CustomerSystemsServiceProvider extends ServiceProvider
 
         \Eventy::addFilter('javascripts', function ($scripts) {
             $scripts[] = \Module::getPublicPath('customersystems').'/js/sidebar.js';
+            $scripts[] = \Module::getPublicPath('customersystems').'/js/settings.js';
             return $scripts;
         });
+
+        \Eventy::addAction('mailboxes.settings.menu', function ($mailbox) {
+            if (auth()->check() && auth()->user()->isAdmin()) {
+                echo view('customersystems::settings_menu', ['mailbox' => $mailbox])->render();
+            }
+        }, 35, 1);
 
         \Eventy::addAction('conversation.after_customer_sidebar', function ($conversation) {
             if (auth()->check() && auth()->user()->can('view', $conversation)) {

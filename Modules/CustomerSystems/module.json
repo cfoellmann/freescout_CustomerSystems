@@ -1,0 +1,12 @@
+{
+    "name": "Customer Systems",
+    "alias": "customersystems",
+    "description": "Shopware-5-Kundendaten anhand der Ticket-E-Mail in der Sidebar.",
+    "version": "0.1.1",
+    "detailsUrl": "https://github.com/cfoellmann/freescout_CustomerSystems",
+    "latestVersionUrl": "https://github.com/cfoellmann/freescout_CustomerSystems/releases/latest/download/version.txt",
+    "latestVersionZipUrl": "https://github.com/cfoellmann/freescout_CustomerSystems/releases/latest/download/CustomerSystems.zip",
+    "providers": ["Modules\\CustomerSystems\\Providers\\CustomerSystemsServiceProvider"],
+    "requires": [],
+    "files": []
+}

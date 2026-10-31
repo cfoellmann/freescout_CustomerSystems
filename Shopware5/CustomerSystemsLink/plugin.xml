@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<plugin>
+    <label lang="de">Customer Systems Kundenlink</label>
+    <label lang="en">Customer Systems customer link</label>
+    <version>0.1.0</version>
+    <author>Customer Systems</author>
+    <compatibility minVersion="5.2.0" maxVersion="5.7.99" />
+</plugin>

@@ -42,11 +42,7 @@
     }
     $(function () {
         $('.customer-systems').each(function () {
-            var panel = $(this), sidebar = panel.closest('#conv-layout-customer');
-            // Preserve the native customer profile above all sidebar boxes.
-            var firstBox = sidebar.find('.conv-sidebar-block').not(panel).first();
-            if (firstBox.length) { panel.insertBefore(firstBox); }
-            load(panel);
+            load($(this));
         });
     });
     $(document).on('click', '.customer-systems-retry', function () {

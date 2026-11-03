@@ -38,6 +38,9 @@ jobs:
       - name: Check recent orders
         run: php tests/orders.php
 
+      - name: Check native sidebar placement
+        run: php tests/sidebar.php
+
       - name: Check PHP compatibility with strict error handling
         run: php tests/php_compatibility.php
 

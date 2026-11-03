@@ -50,7 +50,7 @@ namespace {
         public function view($name, $data) { $this->view = $name; $this->data = $data; return $this; }
         public function json($data, $status) { $this->data = $data; return $this; }
     }
-    function auth() { return new class { public function user() { return $GLOBALS['test_user']; } }; }
+    function auth() { return new class { public function check() { return true; } public function user() { return $GLOBALS['test_user']; } }; }
     function abort_unless($condition, $status) { if (!$condition) { throw new RuntimeException('http_'.$status); } }
     function response() { return new TestResponse(); }
     function redirect() { return new TestResponse(); }

@@ -2,7 +2,7 @@
     "name": "Kundenprofil Abruf",
     "alias": "customersystems",
     "description": "Shopware-6-Kundenprofile und die letzten fünf Bestellungen mit Status und Admin-Link pro Postfach anzeigen.",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "img": "https://raw.githubusercontent.com/cfoellmann/freescout_CustomerSystems/main/Modules/CustomerSystems/Public/img/icon.svg",
     "detailsUrl": "https://github.com/cfoellmann/freescout_CustomerSystems",
     "latestVersionUrl": "https://github.com/cfoellmann/freescout_CustomerSystems/releases/latest/download/version.txt",

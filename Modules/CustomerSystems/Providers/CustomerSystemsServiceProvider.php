@@ -23,10 +23,12 @@ class CustomerSystemsServiceProvider extends ServiceProvider
             }
         }, 35, 1);
 
-        \Eventy::addAction('conversation.after_customer_sidebar', function ($conversation) {
+        // This hook is after the native profile (including its overlapping avatar),
+        // before previous conversations and the other sidebar boxes.
+        \Eventy::addAction('conversation.before_prev_convs', function ($customer, $conversation, $mailbox) {
             if (auth()->check() && auth()->user()->can('view', $conversation)) {
                 echo view('customersystems::sidebar', ['conversation' => $conversation])->render();
             }
-        }, 20, 1);
+        }, -100, 3);
     }
 }

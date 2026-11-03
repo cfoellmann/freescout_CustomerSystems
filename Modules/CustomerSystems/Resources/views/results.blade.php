@@ -14,12 +14,13 @@
     @endif
     @foreach ($customers as $record)
         <div class="panel panel-default">
-            <div class="panel-heading"><h4 class="panel-title"><div>
-                <strong class="small">{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}</strong>
+            <div class="panel-heading"><h4 class="panel-title">
                 @if ($record['backend_url'])
-                    <a href="{{ $record['backend_url'] }}" target="_blank" rel="noopener noreferrer" class="small" title="Kundenprofil im Shopware-Backend öffnen" aria-label="Kundenprofil im Shopware-Backend öffnen"><i class="glyphicon glyphicon-new-window" aria-hidden="true"></i></a>
+                    <a href="{{ $record['backend_url'] }}" target="_blank" rel="noopener noreferrer" title="Kundenprofil im Shopware-Backend öffnen">{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }} <i class="glyphicon glyphicon-new-window" aria-hidden="true"></i></a>
+                @else
+                    <div><strong>{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}</strong></div>
                 @endif
-            </div></h4></div>
+            </h4></div>
             <div class="panel-body"><div class="customer-section">
                 <div class="sidebar-block-header2"><strong>{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}</strong>
                     @if ($record['backend_url'])<a href="{{ $record['backend_url'] }}" target="_blank" rel="noopener noreferrer" title="Kundenprofil im Shopware-Backend öffnen" aria-label="Kundenprofil im Shopware-Backend öffnen"><i class="glyphicon glyphicon-new-window" aria-hidden="true"></i></a>@endif
@@ -46,15 +47,12 @@
                     @if ($record['country'] !== '')<div>{{ $record['country'] }}</div>@endif
                 </div></div>
             @endif
-            </div></div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading"><h4 class="panel-title"><div><strong class="small">Letzte Bestellungen</strong></div></h4></div>
-            <div class="panel-body">
-                <div class="sidebar-block-header2"><strong>Letzte Bestellungen</strong></div>
-                <div class="customer-systems-orders" data-url="{{ $record['orders_url'] }}" aria-live="polite"><p class="customer-section">Bestellungen werden geladen …</p></div>
+                <div class="customer-extra"><div class="customer-section">
+                    <strong>Letzte Bestellungen</strong>
+                    <div class="customer-systems-orders" data-url="{{ $record['orders_url'] }}" aria-live="polite"><p>Bestellungen werden geladen …</p></div>
+                </div></div>
                 <button type="button" class="customer-systems-retry btn btn-link btn-xs sidebar-block-link"><i class="glyphicon glyphicon-refresh" aria-hidden="true"></i> Aktualisieren</button>
-            </div>
+            </div></div>
         </div>
     @endforeach
 @endif

@@ -33,7 +33,7 @@ jobs:
         run: python3 -m unittest discover -s tests -p 'test_release.py' -v
 
       - name: Check customer connections
-        run: php tests/controllers.php
+        run: php tests/logging.php
 
       # version.txt must match the installed manifest; ZIP root must be CustomerSystems/.
       # The builder sets both update URLs to this repository's release assets.

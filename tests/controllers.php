@@ -60,6 +60,7 @@ namespace {
     }
     $GLOBALS['test_user']->admin = true;
     \App\Mailbox::$records[1] = new \App\Mailbox();
+    \App\Mailbox::$records[1]->id = 1;
     $settings['enabled'] = true;
     (new ConnectionSettings())->save(\App\Mailbox::$records[1], $settings);
     $response = $controller->show(1);
@@ -73,7 +74,7 @@ namespace {
     $controller->save(1, new Request(array_merge($settings, ['enabled' => '0', 'api_key' => ''])));
     check(!(new ConnectionSettings())->load(\App\Mailbox::$records[1])['enabled'], 'Settings POST failed to disable');
 
-    \App\Conversation::$record = (object) ['customer_email' => 'test@example.com', 'mailbox' => \App\Mailbox::$records[1]];
+    \App\Conversation::$record = (object) ['id' => 101, 'mailbox_id' => 1, 'customer_email' => 'test@example.com', 'mailbox' => \App\Mailbox::$records[1]];
     $sidebar = new SidebarController();
     failsWith(function () use ($sidebar) { $sidebar->show(1); }, 'http_403');
     $GLOBALS['test_user']->canView = true;
@@ -81,6 +82,7 @@ namespace {
     // Supply a log adapter because FreeScout logs the controlled error code.
     $response = $sidebar->show(1);
     check($response->data['error'] === 'disabled' && $response->data['customers'] === [], 'Disabled mailbox performed lookup');
+    check(isset($controller->test(1, new Request($invalid))->data['reference']), 'Failed test must expose a log reference');
     echo 'OK: '.$passed." total checks including controller authorization passed\n";
 }
 

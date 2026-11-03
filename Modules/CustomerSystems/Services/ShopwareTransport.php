@@ -54,19 +54,20 @@ class ShopwareTransport
         ]);
         $ok = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        $errno = curl_errno($handle);
         curl_close($handle);
         if ($ok !== false && $status === 401) {
-            throw new RuntimeException('authentication_failed');
+            throw new ApiException('authentication_failed', $status, $errno);
         }
         if ($ok !== false && $status === 403) {
-            throw new RuntimeException('permission_denied');
+            throw new ApiException('permission_denied', $status, $errno);
         }
         if ($ok === false || $status !== 200) {
-            throw new RuntimeException('unavailable');
+            throw new ApiException('unavailable', $status, $errno);
         }
         $data = json_decode($body, true);
         if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) {
-            throw new RuntimeException('invalid_response');
+            throw new ApiException('invalid_response', $status, $errno);
         }
         return $data;
     }

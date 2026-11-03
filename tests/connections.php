@@ -6,6 +6,8 @@ require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Client.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Transport.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/JsonHttpClient.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/ConnectionError.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/ApiException.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/DiagnosticLog.php';
 
 use Modules\CustomerSystems\Services\ConnectionSettings;
 use Modules\CustomerSystems\Services\Shopware6Client;

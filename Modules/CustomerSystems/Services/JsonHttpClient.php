@@ -31,13 +31,15 @@ class JsonHttpClient
         ]);
         $ok = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        $errno = curl_errno($handle);
         curl_close($handle);
-        if ($ok === false) { throw new RuntimeException('unavailable'); }
-        if ($status === 401) { throw new RuntimeException('authentication_failed'); }
-        if ($status === 403) { throw new RuntimeException('permission_denied'); }
-        if ($status !== 200) { throw new RuntimeException('unavailable'); }
+        $phase = substr($url, -12) === '/oauth/token' ? 'oauth' : 'api';
+        if ($ok === false) { throw new ApiException('unavailable', $status, $errno, $phase); }
+        if ($status === 401) { throw new ApiException('authentication_failed', $status, $errno, $phase); }
+        if ($status === 403) { throw new ApiException('permission_denied', $status, $errno, $phase); }
+        if ($status !== 200) { throw new ApiException('unavailable', $status, $errno, $phase); }
         $data = json_decode($body, true);
-        if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) { throw new RuntimeException('invalid_response'); }
+        if (!is_array($data) || json_last_error() !== JSON_ERROR_NONE) { throw new ApiException('invalid_response', $status, $errno, $phase); }
         return $data;
     }
 }

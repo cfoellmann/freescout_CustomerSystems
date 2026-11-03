@@ -60,6 +60,9 @@
                 </div>
                 <div class="form-group" data-sw="shopware6"><div class="col-sm-offset-3 col-sm-9"><p class="help-block">Unter Shopware → Einstellungen → System → Integrationen einen Zugang mit Leserechten auf Kunden und die zugehörigen Adressen, Länder und Verkaufskanäle anlegen. Die Anmeldung erfolgt über OAuth 2.0.</p></div></div>
                 <div class="form-group"><div class="col-sm-offset-3 col-sm-9">
+                    <input type="hidden" name="debug_logging" value="0">
+                    <div class="checkbox"><label><input type="checkbox" name="debug_logging" value="1" @if (old('debug_logging', $settings['debug_logging'] ?? false)) checked @endif> Diagnose-Logging: auch erfolgreiche Kundenabrufe protokollieren</label></div>
+                    <p class="help-block">Fehler, Verbindungstests und Konfigurationsänderungen werden immer protokolliert. Logdateien: <code>storage/logs/customer-systems-YYYY-MM-DD.log</code>, maximal 14 Tagesdateien. Keine Zugangsdaten oder Kundeninhalte.</p>
                     <button type="submit" class="btn btn-primary">Speichern</button>
                     <button type="button" class="btn btn-default customer-systems-test">Verbindung testen</button>
                     <p class="help-block">Der Test prüft die aktuellen Formulareingaben und speichert sie nicht.</p>

@@ -34,6 +34,43 @@ Für bestehende Installationen gelten die bisherigen `.env`-Werte aus `.env.exam
 
 Ein FreeScout-API-Modul ist hierfür nicht notwendig. Der Modulendpunkt verwendet die Anmeldung und die bestehende FreeScout-Ticketberechtigung. Er nimmt keine frei übergebene E-Mail entgegen. API-Schlüssel erscheinen nicht im Browser. Alle angezeigten Kundenwerte werden von Blade escaped. API-Fehlertexte und sensible API-Felder werden nicht weitergegeben.
 
+## Diagnose-Logging
+
+Ab Version 0.2.1 schreibt das Modul eigene tägliche Dateien unter `storage/logs/customer-systems-YYYY-MM-DD.log` im FreeScout-Verzeichnis. Es werden maximal 14 Tagesdateien vorgehalten; die Rotation erfolgt beim Schreiben neuer Tagesdateien. Der FreeScout-PHP-Benutzer benötigt Schreibrechte auf `storage/logs`.
+
+Immer protokolliert werden Verbindungsfehler, Verbindungstests (erfolgreich und fehlgeschlagen), ungültige Konfigurationseingaben, gespeicherte Einstellungen sowie Fehler beim Laden und Speichern der Konfiguration. Eine deaktivierte Verbindung erzeugt standardmäßig keine wiederholten Fehler.
+
+Unter **Postfach → Kundenprofil Abruf → Diagnose-Logging** lassen sich zusätzlich erfolgreiche Kundenabrufe mit Trefferanzahl sowie übersprungene Abrufe bei deaktivierter Verbindung einschalten. Anschließend **Speichern**. Die Einstellung gilt nur für dieses Postfach.
+
+Jeder Eintrag enthält Zeitstempel, Ereignis und eine Referenz. Je nach Vorgang kommen Postfach-ID, Ticket-ID, Shopware-Version, Laufzeit in Millisekunden, Trefferanzahl und ein technischer Fehlercode hinzu. HTTP-Fehler enthalten den Status; Netzwerkfehler die cURL-Fehlernummer. Bei Shopware 6 wird zwischen OAuth-Anmeldung und API-Abfrage unterschieden. Fehlgeschlagene Verbindungstests zeigen die passende Log-Referenz direkt im Formular an.
+
+Es werden keine E-Mail-Adressen, Kundenprofile, URLs, API-Benutzer, API-Schlüssel, OAuth-Tokens, Request-/Response-Inhalte oder ungefilterten Exception-Texte in diese Modul-Logs geschrieben. Ein Schreibfehler des Diagnose-Logs bricht den Abruf nicht ab; in diesem Fall versucht das Modul, einen festen Hinweis mit Referenz in FreeScouts Standard-Log zu hinterlassen.
+
+Log auf einem Linux-Server ansehen (im FreeScout-Verzeichnis):
+
+```sh
+tail -f storage/logs/customer-systems-$(date +%F).log
+```
+
+Beispiel:
+
+```text
+customer-systems.WARNING: connection_test.failed {"reference":"a1b2c3d4e5f60708","mailbox_id":2,"duration_ms":815,"system":"shopware6","reason":"authentication_failed","http_status":401,"curl_errno":0,"phase":"oauth"}
+```
+
+Häufige Diagnosewerte:
+
+| Wert | Bedeutung |
+| --- | --- |
+| HTTP 401 / `authentication_failed` | Zugangsdaten abgelehnt |
+| HTTP 403 / `permission_denied` | Fehlende API-Leserechte |
+| cURL 6 | DNS-Auflösung fehlgeschlagen |
+| cURL 7 | Verbindung zum Server fehlgeschlagen |
+| cURL 28 | Zeitüberschreitung |
+| cURL 60 | TLS-Zertifikat konnte nicht validiert werden |
+| `invalid_response` | Unerwartetes Antwortformat oder abweichende Kundenzuordnung |
+| `credentials_unreadable` | Gespeicherte Verbindung nicht entschlüsselbar |
+
 ## Self-Updates und Releases
 
 Das Modul verwendet FreeScouts eingebauten Modul-Updater wie in [Sidebar-Webhook PR #22](https://github.com/fulldecent/freescout-sidebar-webhook/pull/22). Voraussetzung ist FreeScout ab 1.8.124 und ein für den FreeScout-Server öffentlich erreichbares GitHub-Release.
@@ -58,7 +95,7 @@ Lokalen Release-Build mit dem tatsächlichen Repository prüfen:
 
 ```powershell
 python -m unittest discover -s tests -p test_release.py -v
-python tools/build_release.py --tag 0.2.0 --repository cfoellmann/freescout_CustomerSystems
+python tools/build_release.py --tag 0.2.1 --repository cfoellmann/freescout_CustomerSystems
 ```
 
 Die Dateien liegen danach in `dist/`. Ein echtes Update einschließlich GitHub-Weiterleitungen und FreeScout-Installation muss nach dem ersten veröffentlichten Release geprüft werden. Private GitHub-Releases funktionieren mit diesen anonym abgerufenen URLs nicht.
@@ -82,7 +119,7 @@ Das Begleitplugin lauscht auf den Backend-Start und öffnet das Kundenmodul mit 
 Lokal ausführbar, ohne FreeScout oder echte Zugangsdaten:
 
 ```powershell
-php tests/controllers.php
+php tests/logging.php
 Get-ChildItem Modules,Shopware5,tests -Recurse -Filter *.php | Where-Object Name -NotLike '*.blade.php' | ForEach-Object { php -l $_.FullName }
 node --check Modules/CustomerSystems/Public/js/sidebar.js
 node --check Modules/CustomerSystems/Public/js/settings.js

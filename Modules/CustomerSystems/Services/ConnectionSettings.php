@@ -18,7 +18,7 @@ class ConnectionSettings
                 if (!is_array($settings)) {
                     throw new RuntimeException('credentials_unreadable');
                 }
-                return $settings;
+                return array_merge(self::defaults(), $settings);
             } catch (\Throwable $error) {
                 throw new RuntimeException('credentials_unreadable');
             }
@@ -39,7 +39,7 @@ class ConnectionSettings
 
     public static function defaults()
     {
-        return ['enabled' => false, 'type' => 'shopware5', 'url' => '',
+        return ['enabled' => false, 'debug_logging' => false, 'type' => 'shopware5', 'url' => '',
             'backend_url' => '', 'username' => '', 'api_key' => '', 'auth' => 'digest'];
     }
 
@@ -62,7 +62,7 @@ class ConnectionSettings
     {
         $settings = self::defaults();
         foreach ($settings as $key => $default) {
-            if ($key === 'enabled') {
+            if (in_array($key, ['enabled', 'debug_logging'], true)) {
                 continue;
             }
             $value = $input[$key] ?? $default;
@@ -72,6 +72,7 @@ class ConnectionSettings
             $settings[$key] = $key === 'api_key' ? $value : trim($value);
         }
         $settings['enabled'] = in_array($input['enabled'] ?? '0', ['1', 1, true], true);
+        $settings['debug_logging'] = in_array($input['debug_logging'] ?? '0', ['1', 1, true], true);
         if (!in_array($settings['type'], ['shopware5', 'shopware6'], true)
             || !in_array($settings['auth'], ['basic', 'digest'], true)) {
             throw new InvalidArgumentException('Bitte ein gültiges Shopware-System und Authentifizierungsverfahren wählen.');

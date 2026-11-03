@@ -5,6 +5,7 @@ require __DIR__.'/controllers.php';
 use Modules\CustomerSystems\Services\DiagnosticLog;
 use Modules\CustomerSystems\Services\ApiException;
 use Modules\CustomerSystems\Services\ConnectionSettings;
+use Modules\CustomerSystems\Services\ConnectionError;
 
 $records = [];
 $logger = new DiagnosticLog(function ($level, $event, $context) use (&$records) {
@@ -38,4 +39,15 @@ $config = ConnectionSettings::prepare(array_merge($settings, ['debug_logging' =>
 check($config['debug_logging'] === true, 'Diagnostics switch not saved');
 check(ConnectionSettings::prepare(array_merge($config, ['debug_logging' => '0']), $config)['debug_logging'] === false, 'Diagnostics switch not disabled');
 check(DiagnosticLog::elapsed(microtime(true) - 0.02) >= 20, 'Duration missing');
+$phpError = new ErrorException('Sensitive error '.$secret, 0, E_DEPRECATED);
+$logger->record('connection_test.failed', [], $phpError);
+$last = $records[count($records) - 1]['context'];
+check($last['exception_type'] === 'ErrorException' && $last['php_error'] === 'deprecated_api', 'PHP error classification missing');
+check($last['source_file'] === 'external' && $last['source_line'] > 0 && isset($last['php_version']), 'Safe PHP error location missing');
+check(strpos(json_encode($last), $secret) === false, 'PHP error message leaked');
+check(strpos(ConnectionError::forException($phpError), 'Interner PHP-Fehler') !== false, 'Unexpected PHP error misreported as Shopware rejection');
+check(strpos(ConnectionError::forException($phpError), $secret) === false, 'UI leaked raw PHP error');
+check(strpos(ConnectionError::forException(new ApiException('unavailable', 0, 60)), 'TLS-Zertifikat') !== false, 'Missing TLS diagnosis');
+check(strpos(ConnectionError::forException(new ApiException('unavailable', 301, 0)), 'Weiterleitung') !== false, 'Missing redirect diagnosis');
+check(strpos(ConnectionError::forException(new ApiException('permission_denied', 403, 0, 'oauth')), 'HTTP 403') !== false, 'HTTP status missing from connection test');
 echo 'OK: '.$passed." total checks including logging redaction passed\n";

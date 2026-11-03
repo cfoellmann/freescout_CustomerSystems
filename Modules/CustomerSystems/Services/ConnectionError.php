@@ -4,6 +4,36 @@ namespace Modules\CustomerSystems\Services;
 
 class ConnectionError
 {
+    public static function forException(\Throwable $error)
+    {
+        $reason = DiagnosticLog::reason($error);
+        if ($reason === 'unexpected_error') {
+            $details = DiagnosticLog::details($error);
+            return 'Interner PHP-Fehler im FreeScout-Server: '.$details['exception_type'].
+                ' bei '.$details['source_file'].':'.$details['source_line'].' (PHP '.$details['php_version'].').'.
+                (($details['php_error'] ?? '') === 'deprecated_api' ? ' Eine veraltete PHP-Funktion wurde als Fehler behandelt.' : '');
+        }
+        if ($error instanceof ApiException) {
+            if ($error->curlErrno !== 0) {
+                $network = [
+                    6 => 'DNS-Auflösung des Shopware-Servers fehlgeschlagen.',
+                    7 => 'Verbindung zum Shopware-Server fehlgeschlagen.',
+                    23 => 'Die Shopware-Antwort konnte nicht vollständig verarbeitet werden.',
+                    28 => 'Zeitüberschreitung beim Verbindungsaufbau oder Abruf.',
+                    35 => 'TLS-Verbindungsaufbau fehlgeschlagen.',
+                    60 => 'Das TLS-Zertifikat wird vom FreeScout-Server nicht als vertrauenswürdig erkannt. CA-Zertifikate auf dem Server prüfen.',
+                ];
+                return ($network[$error->curlErrno] ?? 'Netzwerkfehler beim Shopware-Abruf.').' (cURL '.$error->curlErrno.')';
+            }
+            $message = self::message($reason).' (HTTP '.$error->httpStatus.')';
+            if ($error->httpStatus >= 300 && $error->httpStatus < 400) {
+                $message = 'Shopware antwortet mit einer Weiterleitung (HTTP '.$error->httpStatus.'). Bitte die endgültige HTTPS-API-URL eintragen.';
+            }
+            return $message.' Schritt: '.($error->phase === 'oauth' ? 'OAuth-Anmeldung.' : 'Kunden-API.');
+        }
+        return self::message($reason);
+    }
+
     public static function message($code)
     {
         $messages = [

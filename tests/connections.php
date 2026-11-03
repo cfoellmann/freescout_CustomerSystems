@@ -23,6 +23,7 @@ function decrypt($value) {
 }
 function config($key, $default = null) { return $GLOBALS['legacy_config'] ?? $default; }
 class TestMailbox {
+    public $id;
     public $meta = [];
     public $saved = false;
     public function getMeta($key) { return $this->meta[$key] ?? null; }

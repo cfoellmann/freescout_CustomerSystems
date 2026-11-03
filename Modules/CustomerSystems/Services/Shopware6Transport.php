@@ -10,7 +10,7 @@ class Shopware6Transport
     private $request;
     private $token;
 
-    public function __construct(array $config, callable $request = null)
+    public function __construct(array $config, ?callable $request = null)
     {
         $this->config = $config;
         // Injection permits testing OAuth and request headers without live credentials.

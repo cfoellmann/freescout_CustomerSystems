@@ -88,7 +88,7 @@ class SettingsController extends Controller
             $ok = false;
         } catch (\Throwable $error) {
             $failure = $error;
-            $message = ConnectionError::message($error->getMessage());
+            $message = ConnectionError::forException($error);
             $ok = false;
         }
         $reference = (new DiagnosticLog())->record('connection_test.'.($ok ? 'succeeded' : 'failed'), [

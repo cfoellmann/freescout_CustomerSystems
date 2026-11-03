@@ -35,6 +35,9 @@ jobs:
       - name: Check customer connections
         run: php tests/logging.php
 
+      - name: Check PHP compatibility with strict error handling
+        run: php tests/php_compatibility.php
+
       # version.txt must match the installed manifest; ZIP root must be CustomerSystems/.
       # The builder sets both update URLs to this repository's release assets.
       - name: Build assets and validate tag against module.json

@@ -22,7 +22,9 @@ class JsonHttpClient
             // application/json requests the flattened Admin API response, not JSON:API relationships.
             CURLOPT_HTTPHEADER => array_merge(['Accept: application/json', 'Content-Type: application/json'], $headers),
             CURLOPT_FOLLOWLOCATION => false, CURLOPT_CONNECTTIMEOUT => 3, CURLOPT_TIMEOUT => 8,
-            CURLOPT_SSL_VERIFYPEER => true, CURLOPT_SSL_VERIFYHOST => 2, CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_SSL_VERIFYPEER => true, CURLOPT_SSL_VERIFYHOST => 2,
+            (defined('CURLOPT_PROTOCOLS_STR') ? CURLOPT_PROTOCOLS_STR : CURLOPT_PROTOCOLS) =>
+                (defined('CURLOPT_PROTOCOLS_STR') ? 'https' : CURLPROTO_HTTPS),
             CURLOPT_WRITEFUNCTION => function ($handle, $chunk) use (&$body) {
                 if (strlen($body) + strlen($chunk) > 2 * 1024 * 1024) { return 0; }
                 $body .= $chunk;
@@ -32,7 +34,9 @@ class JsonHttpClient
         $ok = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         $errno = curl_errno($handle);
-        curl_close($handle);
+        // Dropping the final reference closes resources (PHP 7) and handles (PHP 8).
+        // curl_close() is deprecated in PHP 8.5 and can become an ErrorException in Laravel.
+        unset($handle);
         $phase = substr($url, -12) === '/oauth/token' ? 'oauth' : 'api';
         if ($ok === false) { throw new ApiException('unavailable', $status, $errno, $phase); }
         if ($status === 401) { throw new ApiException('authentication_failed', $status, $errno, $phase); }

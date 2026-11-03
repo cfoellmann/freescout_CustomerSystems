@@ -19,6 +19,25 @@ class DiagnosticLog
         return in_array($error->getMessage(), $known, true) ? $error->getMessage() : 'unexpected_error';
     }
 
+    public static function details(\Throwable $error)
+    {
+        $details = [];
+        foreach (['ErrorException', 'TypeError', 'ParseError', 'Error', 'RuntimeException', 'Exception'] as $type) {
+            if ($error instanceof $type) { $details['exception_type'] = $type; break; }
+        }
+        $details['exception_type'] = $details['exception_type'] ?? 'Throwable';
+        $root = str_replace('\\', '/', dirname(__DIR__)).'/';
+        $file = str_replace('\\', '/', $error->getFile());
+        // Reveal a module filename and line only, never the server's full filesystem path.
+        $details['source_file'] = strpos($file, $root) === 0 ? basename($file) : 'external';
+        $details['source_line'] = max(0, (int) $error->getLine());
+        $details['php_version'] = PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION.'.'.PHP_RELEASE_VERSION;
+        if ($error instanceof \ErrorException && $error->getSeverity() === E_DEPRECATED) {
+            $details['php_error'] = 'deprecated_api';
+        }
+        return $details;
+    }
+
     public function record($event, array $context = [], ?\Throwable $error = null)
     {
         // Only known event names and typed fields may reach the logger. Never pass a request,
@@ -40,6 +59,9 @@ class DiagnosticLog
         }
         if ($error) {
             $safe['reason'] = self::reason($error);
+            if ($safe['reason'] === 'unexpected_error') {
+                $safe = array_merge($safe, self::details($error));
+            }
             if ($error instanceof ApiException) {
                 $safe['http_status'] = $error->httpStatus;
                 $safe['curl_errno'] = $error->curlErrno;

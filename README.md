@@ -46,6 +46,8 @@ Jeder Eintrag enthält Zeitstempel, Ereignis und eine Referenz. Je nach Vorgang 
 
 Es werden keine E-Mail-Adressen, Kundenprofile, URLs, API-Benutzer, API-Schlüssel, OAuth-Tokens, Request-/Response-Inhalte oder ungefilterten Exception-Texte in diese Modul-Logs geschrieben. Ein Schreibfehler des Diagnose-Logs bricht den Abruf nicht ab; in diesem Fall versucht das Modul, einen festen Hinweis mit Referenz in FreeScouts Standard-Log zu hinterlassen.
 
+Ab Version 0.2.2 werden unerwartete PHP-Fehler zusätzlich mit Exception-Typ, PHP-Version, Modul-Dateiname und Zeile protokolliert. Vollständige Serverpfade und rohe Exception-Texte bleiben ausgeblendet. Der Verbindungstest zeigt interne PHP-Fehler, HTTP-Status und bekannte Netzwerkprobleme wie TLS-Zertifikatsfehler direkt an. Veraltete PHP-Aufrufe in cURL-Handling und OAuth-Transport wurden für PHP 8.4/8.5 ersetzt; ein Regressionstest verwendet Laravels strenge Fehlerbehandlung.
+
 Log auf einem Linux-Server ansehen (im FreeScout-Verzeichnis):
 
 ```sh
@@ -95,7 +97,7 @@ Lokalen Release-Build mit dem tatsächlichen Repository prüfen:
 
 ```powershell
 python -m unittest discover -s tests -p test_release.py -v
-python tools/build_release.py --tag 0.2.1 --repository cfoellmann/freescout_CustomerSystems
+python tools/build_release.py --tag 0.2.2 --repository cfoellmann/freescout_CustomerSystems
 ```
 
 Die Dateien liegen danach in `dist/`. Ein echtes Update einschließlich GitHub-Weiterleitungen und FreeScout-Installation muss nach dem ersten veröffentlichten Release geprüft werden. Private GitHub-Releases funktionieren mit diesen anonym abgerufenen URLs nicht.
@@ -120,6 +122,7 @@ Lokal ausführbar, ohne FreeScout oder echte Zugangsdaten:
 
 ```powershell
 php tests/logging.php
+php tests/php_compatibility.php
 Get-ChildItem Modules,Shopware5,tests -Recurse -Filter *.php | Where-Object Name -NotLike '*.blade.php' | ForEach-Object { php -l $_.FullName }
 node --check Modules/CustomerSystems/Public/js/sidebar.js
 node --check Modules/CustomerSystems/Public/js/settings.js

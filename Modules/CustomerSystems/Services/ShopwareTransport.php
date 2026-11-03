@@ -43,7 +43,8 @@ class ShopwareTransport
             CURLOPT_TIMEOUT => 8,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            (defined('CURLOPT_PROTOCOLS_STR') ? CURLOPT_PROTOCOLS_STR : CURLOPT_PROTOCOLS) =>
+                (defined('CURLOPT_PROTOCOLS_STR') ? 'https' : CURLPROTO_HTTPS),
             CURLOPT_WRITEFUNCTION => function ($handle, $chunk) use (&$body) {
                 if (strlen($body) + strlen($chunk) > 2 * 1024 * 1024) {
                     return 0;
@@ -55,7 +56,7 @@ class ShopwareTransport
         $ok = curl_exec($handle);
         $status = curl_getinfo($handle, CURLINFO_HTTP_CODE);
         $errno = curl_errno($handle);
-        curl_close($handle);
+        unset($handle);
         if ($ok !== false && $status === 401) {
             throw new ApiException('authentication_failed', $status, $errno);
         }

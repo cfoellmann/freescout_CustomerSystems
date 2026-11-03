@@ -29,7 +29,8 @@ class ConnectionError
             if ($error->httpStatus >= 300 && $error->httpStatus < 400) {
                 $message = 'Shopware antwortet mit einer Weiterleitung (HTTP '.$error->httpStatus.'). Bitte die endgültige HTTPS-API-URL eintragen.';
             }
-            return $message.' Schritt: '.($error->phase === 'oauth' ? 'OAuth-Anmeldung.' : 'Kunden-API.');
+            return $message.' Schritt: '.($error->phase === 'oauth' ? 'OAuth-Anmeldung.'
+                : ($error->phase === 'orders' ? 'Bestell-API.' : 'Kunden-API.'));
         }
         return self::message($reason);
     }
@@ -45,7 +46,7 @@ class ConnectionError
             'too_many_matches' => 'Mehr als fünf Kunden gefunden. Bitte die Zuordnung im Shop prüfen.',
             'invalid_response' => 'Shopware hat unerwartete oder abweichende Kundendaten geliefert.',
             'authentication_failed' => 'Shopware hat die Zugangsdaten abgelehnt. Bitte Benutzer / Access-Key-ID und Schlüssel prüfen.',
-            'permission_denied' => 'Der Shopware-Zugang hat keine ausreichenden Leserechte auf Kunden.',
+            'permission_denied' => 'Der Shopware-Zugang hat nicht alle erforderlichen Leserechte auf Kunden, Bestellungen oder deren Status.',
             'unavailable' => 'Shopware ist derzeit nicht erreichbar oder hat den Zugriff abgelehnt.',
         ];
         return $messages[$code] ?? $messages['unavailable'];

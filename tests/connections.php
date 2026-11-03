@@ -1,6 +1,8 @@
 <?php
 
-require __DIR__.'/run.php';
+require __DIR__.'/helpers.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/BackendLink.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/OrderSummary.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/ConnectionSettings.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Client.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Transport.php';
@@ -21,7 +23,6 @@ function decrypt($value) {
     if (strpos($value, 'encrypted:') !== 0) { throw new RuntimeException('Invalid ciphertext'); }
     return unserialize(base64_decode(substr($value, 10)));
 }
-function config($key, $default = null) { return $GLOBALS['legacy_config'] ?? $default; }
 class TestMailbox {
     public $id;
     public $meta = [];
@@ -34,7 +35,7 @@ class TestMailbox {
 $settings = ConnectionSettings::defaults();
 $settings = array_merge($settings, ['enabled' => true, 'url' => 'https://shop.example.com/api', 'username' => 'reader', 'api_key' => 'secret']);
 check(ConnectionSettings::prepare(array_merge($settings, ['api_key' => '']), $settings)['api_key'] === 'secret', 'Empty key should preserve saved key');
-foreach (['type' => 'shopware6', 'url' => 'https://other.example.com/api', 'username' => 'another-user', 'auth' => 'basic'] as $key => $value) {
+foreach (['url' => 'https://other.example.com/api', 'username' => 'another-user'] as $key => $value) {
     try {
         ConnectionSettings::prepare(array_merge($settings, [$key => $value, 'api_key' => '']), $settings);
         throw new RuntimeException('Changed connection reused credentials');
@@ -50,16 +51,7 @@ foreach (['http://shop.example.com/api', 'https://user:pass@shop.example.com/api
     } catch (InvalidArgumentException $expected) { check(true, 'Unsafe URL must be rejected'); }
 }
 $store = new ConnectionSettings();
-check(ConnectionSettings::defaults()['sidebar_title'] === 'Kundendetails', 'Default sidebar heading incorrect');
-$customTitle = ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => '  Kunden aus dem Shop  ', 'api_key' => '']), $settings);
-check($customTitle['sidebar_title'] === 'Kunden aus dem Shop' && $customTitle['api_key'] === 'secret', 'Heading change must preserve connection credentials');
-check(ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => '']), $settings)['sidebar_title'] === 'Kundendetails', 'Empty heading must reset default');
-foreach ([str_repeat('a', 121), "Kunde\nTitel", ['bad']] as $badTitle) {
-    try {
-        ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => $badTitle]), $settings);
-        throw new RuntimeException('Invalid heading accepted');
-    } catch (InvalidArgumentException $expected) { check(true, 'Invalid heading must be rejected'); }
-}
+check(ConnectionSettings::defaults()['type'] === 'shopware6', 'Default connector must be Shopware 6');
 $mailboxA = new TestMailbox();
 $mailboxB = new TestMailbox();
 $store->save($mailboxA, $settings);
@@ -67,11 +59,8 @@ check($mailboxA->saved && is_string($mailboxA->meta[ConnectionSettings::META_KEY
 check(strpos($mailboxA->meta[ConnectionSettings::META_KEY], 'secret') === false, 'Clear text secret stored');
 check($store->load($mailboxA) === $settings, 'Stored configuration not loaded');
 check(!$store->load($mailboxB)['enabled'], 'Configuration crossed mailbox boundary');
-$GLOBALS['legacy_config'] = ['url' => 'https://legacy.example.com/api', 'api_key' => 'legacy'];
-check($store->load($mailboxB)['enabled'], 'Legacy configuration fallback missing');
-check($store->load($mailboxA)['url'] === $settings['url'], 'Legacy configuration overrode mailbox');
 $store->save($mailboxB, $disabled);
-check(!$store->load($mailboxB)['enabled'], 'Explicit disable must override environment fallback');
+check(!$store->load($mailboxB)['enabled'], 'Explicit disable must be persisted');
 $mailboxB->meta[ConnectionSettings::META_KEY] = 'broken';
 failsWith(function () use ($store, $mailboxB) { $store->load($mailboxB); }, 'credentials_unreadable');
 
@@ -115,12 +104,22 @@ failsWith(function () use ($settings) {
     $transport = new Shopware6Transport($settings, function () { return ['access_token' => "bad\r\nInjected: yes", 'token_type' => 'Bearer']; });
     $transport('search/customer', []);
 }, 'invalid_response');
-check(BackendLink::customer('https://shop.example.com/admin', $id, 'shopware6') === 'https://shop.example.com/admin#/sw/customer/detail/'.$id.'/base', 'SW6 profile link wrong');
-check(BackendLink::customer('https://shop.example.com/admin', '123', 'shopware6') === null, 'Invalid SW6 id accepted');
-$probe = new Shopware6Client(function ($path, $body) {
-    check($body['includes'] === ['customer' => ['id']], 'Probe should request only customer IDs');
+check(BackendLink::customer('https://shop.example.com/admin', $id) === 'https://shop.example.com/admin#/sw/customer/detail/'.$id.'/base', 'SW6 profile link wrong');
+check(BackendLink::customer('https://shop.example.com/admin', '123') === null, 'Invalid SW6 id accepted');
+$probePaths = [];
+$probe = new Shopware6Client(function ($path, $body) use (&$probePaths) {
+    $probePaths[] = $path;
+    if ($path === 'search/customer') { check($body['includes'] === ['customer' => ['id']], 'Probe should request only customer IDs'); }
+    else { check(isset($body['associations']['orderCustomer'], $body['associations']['stateMachineState']), 'Probe must check order ownership and status permissions'); }
     return ['data' => []];
 });
 $probe->testConnection();
+check($probePaths === ['search/customer', 'search/order'], 'Connection test must verify both APIs');
+failsWith(function () {
+    (new Shopware6Client(function ($path) {
+        if ($path === 'search/order') { throw new \Modules\CustomerSystems\Services\ApiException('permission_denied', 403, 0, 'orders'); }
+        return ['data' => []];
+    }))->testConnection();
+}, 'permission_denied');
 check(ConnectionError::message('unexpected-secret') === ConnectionError::message('unavailable'), 'Error could expose upstream response');
 echo 'OK: '.$passed." total checks passed\n";

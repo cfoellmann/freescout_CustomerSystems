@@ -15,10 +15,9 @@ spl_autoload_register(function ($class) {
 
 use Modules\CustomerSystems\Services\Shopware6Transport;
 use Modules\CustomerSystems\Services\JsonHttpClient;
-use Modules\CustomerSystems\Services\ShopwareTransport;
 use Modules\CustomerSystems\Services\ApiException;
 
-$settings = ['url' => 'https://127.0.0.1:1/api', 'username' => 'test', 'api_key' => 'test', 'auth' => 'basic'];
+$settings = ['url' => 'https://127.0.0.1:1/api', 'username' => 'test', 'api_key' => 'test'];
 $transport = new Shopware6Transport($settings, function ($url) {
     return substr($url, -12) === '/oauth/token' ? ['access_token' => 'test.token', 'token_type' => 'Bearer'] : ['data' => []];
 });
@@ -26,8 +25,7 @@ $result = $transport('search/customer', ['limit' => 1]);
 if ($result !== ['data' => []]) { throw new RuntimeException('OAuth smoke test failed'); }
 
 if (function_exists('curl_init')) {
-    foreach ([function () { (new JsonHttpClient())->post('https://127.0.0.1:1/api', [], []); },
-        function () use ($settings) { (new ShopwareTransport($settings))('customers', []); }] as $request) {
+    foreach ([function () { (new JsonHttpClient())->post('https://127.0.0.1:1/api', [], []); }] as $request) {
         try {
             $request();
             throw new RuntimeException('Expected refused local connection');

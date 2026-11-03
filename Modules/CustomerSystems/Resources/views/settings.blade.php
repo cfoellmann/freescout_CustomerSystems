@@ -19,52 +19,32 @@
                   data-test-url="{{ route('mailboxes.customersystems.test', ['id' => $mailbox->id]) }}">
                 {{ csrf_field() }}
                 <input type="hidden" name="enabled" value="0">
-                <h3>Anzeige</h3>
-                <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cs-title">Sidebar-Überschrift</label>
-                    <div class="col-sm-9"><input id="cs-title" type="text" name="sidebar_title" class="form-control" maxlength="120" value="{{ old('sidebar_title', $settings['sidebar_title'] ?? 'Kundendetails') }}" placeholder="Kundendetails">
-                        <p class="help-block">Gilt für dieses Postfach. Leer lassen für „Kundendetails“.</p></div>
-                </div>
                 <h3>Shopware-Verbindung</h3>
                 <div class="form-group"><div class="col-sm-offset-3 col-sm-9"><div class="checkbox">
                     <label><input type="checkbox" name="enabled" value="1" @if (old('enabled', $settings['enabled'])) checked @endif> Für dieses Postfach aktivieren</label>
                 </div></div></div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cs-type">System</label>
-                    <div class="col-sm-9"><select id="cs-type" name="type" class="form-control">
-                        <option value="shopware5" @if (old('type', $settings['type']) === 'shopware5') selected @endif>Shopware 5</option>
-                        <option value="shopware6" @if (old('type', $settings['type']) === 'shopware6') selected @endif>Shopware 6</option>
-                    </select></div>
-                </div>
-                <div class="form-group">
                     <label class="col-sm-3 control-label" for="cs-url">API-URL</label>
                     <div class="col-sm-9"><input id="cs-url" type="url" name="url" class="form-control" maxlength="2048" placeholder="https://shop.example.com/api" value="{{ old('url', $settings['url']) }}">
-                        <p class="help-block">HTTPS-Adresse inklusive <code>/api</code>, auch bei Shopware 6.</p></div>
+                        <p class="help-block">Shopware-6-Adresse inklusive <code>/api</code>, zum Beispiel <code>https://shop.example.com/api</code>.</p></div>
                 </div>
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="cs-backend">Backend-URL</label>
                     <div class="col-sm-9"><input id="cs-backend" type="url" name="backend_url" class="form-control" maxlength="2048" value="{{ old('backend_url', $settings['backend_url']) }}">
-                        <p class="help-block"><span data-sw="shopware5">Optional: https://shop.example.com/backend. Für Kunden-Direktlinks ist das Begleitplugin nötig.</span><span data-sw="shopware6">Optional: https://shop.example.com/admin. Kundenprofile werden direkt in der Administration geöffnet.</span></p></div>
+                        <p class="help-block">Optional: <code>https://shop.example.com/admin</code>. Kundenprofile und Bestellungen werden direkt in der Administration geöffnet.</p></div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cs-user"><span data-sw="shopware5">API-Benutzer</span><span data-sw="shopware6">Access-Key-ID</span></label>
+                    <label class="col-sm-3 control-label" for="cs-user">Access-Key-ID</label>
                     <div class="col-sm-9"><input id="cs-user" type="text" name="username" class="form-control" maxlength="2048" autocomplete="off" value="{{ old('username', $settings['username']) }}"></div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-3 control-label" for="cs-key"><span data-sw="shopware5">API-Key</span><span data-sw="shopware6">Secret Access Key</span></label>
+                    <label class="col-sm-3 control-label" for="cs-key">Secret Access Key</label>
                     <div class="col-sm-9"><input id="cs-key" type="password" name="api_key" class="form-control" maxlength="4096" autocomplete="new-password" value="">
-                        <p class="help-block">{{ $hasSecret ? 'Ein Schlüssel ist gespeichert. Leer lassen, um ihn beizubehalten.' : 'Noch kein Schlüssel gespeichert.' }} Bei geändertem System, API-Ziel oder Benutzer bitte neu eingeben.</p>
+                        <p class="help-block">{{ $hasSecret ? 'Ein Schlüssel ist gespeichert. Leer lassen, um ihn beizubehalten.' : 'Noch kein Schlüssel gespeichert.' }} Bei geändertem API-Ziel oder Access-Key-ID bitte neu eingeben.</p>
                         <div class="checkbox"><label><input type="checkbox" name="clear_secret" value="1"> Gespeicherten Schlüssel löschen (Verbindung vorher deaktivieren)</label></div>
                     </div>
                 </div>
-                <div class="form-group" data-sw="shopware5">
-                    <label class="col-sm-3 control-label" for="cs-auth">Authentifizierung</label>
-                    <div class="col-sm-9"><select id="cs-auth" name="auth" class="form-control">
-                        <option value="digest" @if (old('auth', $settings['auth']) === 'digest') selected @endif>Digest</option>
-                        <option value="basic" @if (old('auth', $settings['auth']) === 'basic') selected @endif>Basic (ab Shopware 5.3.2)</option>
-                    </select></div>
-                </div>
-                <div class="form-group" data-sw="shopware6"><div class="col-sm-offset-3 col-sm-9"><p class="help-block">Unter Shopware → Einstellungen → System → Integrationen einen Zugang mit Leserechten auf Kunden und die zugehörigen Adressen, Länder und Verkaufskanäle anlegen. Die Anmeldung erfolgt über OAuth 2.0.</p></div></div>
+                <div class="form-group"><div class="col-sm-offset-3 col-sm-9"><p class="help-block">Unter Shopware → Einstellungen → System → Integrationen einen Zugang mit den Leserechten <code>customer</code>, <code>customer_address</code>, <code>country</code>, <code>order</code>, <code>order_customer</code> und <code>state_machine_state</code> anlegen. Die Anmeldung erfolgt über OAuth 2.0. Die vollständige Anleitung steht in der README.</p></div></div>
                 <div class="form-group"><div class="col-sm-offset-3 col-sm-9">
                     <input type="hidden" name="debug_logging" value="0">
                     <div class="checkbox"><label><input type="checkbox" name="debug_logging" value="1" @if (old('debug_logging', $settings['debug_logging'] ?? false)) checked @endif> Diagnose-Logging: auch erfolgreiche Kundenabrufe protokollieren</label></div>

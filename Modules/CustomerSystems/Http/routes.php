@@ -9,6 +9,8 @@ Route::group([
 ], function () {
     Route::get('/customer-systems/conversation/{id}', 'SidebarController@show')
         ->where('id', '[0-9]+')->name('customersystems.show');
+    Route::get('/customer-systems/conversation/{id}/orders/{customerId}', 'OrdersController@show')
+        ->where('id', '[0-9]+')->where('customerId', '[a-fA-F0-9]{1,32}')->name('customersystems.orders');
     Route::get('/mailbox/customer-systems/{id}', 'SettingsController@show')
         ->where('id', '[0-9]+')->name('mailboxes.customersystems');
     Route::post('/mailbox/customer-systems/{id}', 'SettingsController@save')

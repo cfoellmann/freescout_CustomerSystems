@@ -1,154 +1,166 @@
-# FreeScout Kundenprofil Abruf
+# Kundenprofil Abruf für FreeScout
 
-FreeScout-Modul für **Shopware 5 und Shopware 6**. Die Zuordnung erfolgt über die `customer_email` des geöffneten Tickets. Die Verbindung lässt sich pro Postfach konfigurieren. **büro+ wird als ausgegraute, noch nicht verfügbare Verbindung angezeigt.** Der technische Modulordner bleibt `CustomerSystems` und der Alias `customersystems`.
+Shopware-6-Kundenprofile anhand der Kunden-E-Mail eines Tickets abrufen. Die Verbindung wird pro Postfach konfiguriert.
 
-Angezeigt werden Kundennummer, Firma, Name, E-Mail, Telefon und Rechnungsanschrift. Technische Shopware- und Verkaufskanal-IDs bleiben ausgeblendet. Die Kundendaten laden nach dem Ticket asynchron. Mehrere Treffer werden einzeln angezeigt; bei mehr als fünf Treffern fordert das Modul zur Prüfung im Shop auf. Es verändert keine Daten und speichert keine Shopware-Kundendaten in FreeScout.
+Der native Kundenbereich von FreeScout bleibt oben. Direkt vor der ersten Sidebar-Box erscheinen:
 
-## Installation in FreeScout
+- Eine Box mit **Kundenname und Profil-Link im Kopf**, Kundennummer, Firma, E-Mail, Telefon und Rechnungsanschrift.
+- **Letzte Bestellungen**: maximal fünf Bestellungen dieses Kunden, neueste zuerst, mit Bestellnummer, Datum, Bestellstatus und Direktlink in den Shopware-Admin. Die Liste verwendet FreeScouts native Struktur von „Vorherige Gespräche“.
+- Bei mehreren Konten derselben E-Mail erhält jeder Kunde seine eigene Bestellliste. Technische IDs werden nicht als Felder angezeigt.
 
-1. `Modules/CustomerSystems` in das gleichnamige `Modules`-Verzeichnis der FreeScout-Installation kopieren. Der Ordner muss `CustomerSystems` heißen.
-2. In FreeScout **Verwalten → Module** das Modul aktivieren und den FreeScout-Cache über die Systemwerkzeuge leeren. HTTPS und PHP-cURL sind erforderlich.
-3. Als Administrator unter **Verwalten → Postfächer → gewünschtes Postfach → Kundenprofil Abruf** die Verbindung einrichten.
-4. System auswählen, Zugangsdaten eingeben und **Verbindung testen**. Anschließend die Verbindung aktivieren und **Speichern**.
-5. Für Shopware-5-Backend-Direktlinks zusätzlich das unten beschriebene Begleitplugin installieren. Shopware 6 benötigt kein Begleitplugin.
+Das Modul arbeitet lesend. Bestellungen laden getrennt nach; fehlerhafte Bestellabfragen verhindern nicht die Anzeige des Kundenprofils. büro+ ist ausgegraut als noch nicht verfügbar. Ab **0.3.0 wird ausschließlich Shopware 6 unterstützt**. Das frühere Begleitplugin und die konfigurierbare Sidebar-Überschrift entfallen.
 
-## Verbindung pro Postfach
+## Erstinstallation – empfohlen mit GH-Installer
 
-Ab Version 0.2.3 steht der Block an erster Stelle der rechten Ticket-Sidebar und verwendet FreeScouts native Panel-, Kontakt- und Adressgestaltung. Die Überschrift lautet standardmäßig **Kundendetails**. Unter **Postfach → Kundenprofil Abruf → Anzeige → Sidebar-Überschrift** kann sie pro Postfach geändert werden; ein leeres Feld setzt den Standard zurück. Das kleine Symbol hinter dem Kundennamen öffnet das Shopware-Kundenprofil in einem neuen Tab, sofern eine Backend-URL konfiguriert ist. Technische IDs werden weiterhin intern für den Direktlink verwendet, aber nicht mehr angezeigt.
+Wir empfehlen den [Github.com Installer für FreeScout](https://github.com/wus-technik/freescout_gh-installer) für die Erstinstallation.
 
-Die Einstellungsseite ist ausschließlich für FreeScout-Administratoren zugänglich. Auch Speichern und Verbindungstest prüfen die Administratorrolle. Konfigurierbar sind Aktivierung, System (Shopware 5 oder 6), API-URL, optionale Backend-URL, Benutzer / Access-Key-ID, API-Key / Secret und bei Shopware 5 Digest oder Basic.
+Wenn der Installer noch nicht vorhanden ist:
 
-| Einstellung | Shopware 5 | Shopware 6 |
+1. `GHInstaller.zip` aus dessen [neuestem Release](https://github.com/wus-technik/freescout_gh-installer/releases/latest) herunterladen.
+2. Den enthaltenen Ordner `GHInstaller/` nach `<freescout>/Modules/` kopieren.
+3. PHP-Erweiterungen `curl`, `zip` und `json` sowie Schreibrechte des Webserver-Benutzers auf `Modules` und `storage/app` sicherstellen.
+4. Unter **Verwalten → Module** den GHInstaller aktivieren.
+
+Danach dieses Modul installieren:
+
+1. Als FreeScout-Administrator **Verwalten → Einstellungen → Github.com Installer** öffnen.
+2. Repository-URL: `https://github.com/cfoellmann/freescout_CustomerSystems`.
+3. Den gewünschten veröffentlichten Release-Tag, z. B. `0.3.0`, separat als Referenz eintragen. Ohne Referenz wird der Standard-Branch verwendet.
+4. **Repository prüfen** wählen. Die Vorschau muss „Kundenprofil Abruf“, Alias `customersystems` und technischen Ordner `CustomerSystems` erkennen.
+5. Den geprüften Stand und das Vertrauen bestätigen, dann **Modul installieren**.
+6. Unter **Verwalten → Module** „Kundenprofil Abruf“ aktivieren.
+7. Shopware und das gewünschte FreeScout-Postfach wie unten konfigurieren.
+
+Spätere Updates dieses Moduls erfolgen über **FreeScouts native Modulverwaltung**, weil es eigene Update-URLs besitzt. Der GH-Installer bietet dafür keinen zweiten Updateweg an.
+
+### Alternative: manuell installieren
+
+`CustomerSystems.zip` aus dem [neuesten Release](https://github.com/cfoellmann/freescout_CustomerSystems/releases/latest) herunterladen und den enthaltenen Ordner nach `<freescout>/Modules/CustomerSystems/` kopieren. Direkt darin muss `module.json` liegen. Unter **Verwalten → Module** aktivieren; bei Bedarf den FreeScout-Cache leeren.
+
+Voraussetzungen: FreeScout ab 1.8.124, PHP-cURL, ausgehendes HTTPS zu Shop und GitHub sowie funktionierende CA-Zertifikate. Ein zusätzliches FreeScout-API-Modul ist nicht erforderlich.
+
+## Shopware 6 genau konfigurieren
+
+### 1. Rolle mit Leserechten anlegen
+
+1. Als Administrator im **Shopware-6-Admin** anmelden.
+2. **Einstellungen → System → Benutzer & Rechte** öffnen.
+3. Im Bereich **Rollen** eine neue Rolle erstellen, z. B. **FreeScout Kunden und Bestellungen**.
+4. Im Tab für detaillierte Berechtigungen bei diesen Einträgen ausschließlich **Lesen** aktivieren:
+
+| Eintrag | Privileg | Zweck |
 | --- | --- | --- |
-| API-URL | `https://shop.example.com/api` | `https://shop.example.com/api` |
-| Backend-URL | `https://shop.example.com/backend` | `https://shop.example.com/admin` |
-| Benutzerfeld | API-Benutzer | Access-Key-ID einer Integration |
-| Schlüsselfeld | API-Key | Secret Access Key |
-| Anmeldung | Digest oder Basic ab 5.3.2 | OAuth 2.0 Client Credentials |
+| `customer` | `customer:read` | Kundenprofil und E-Mail-Zuordnung |
+| `customer_address` | `customer_address:read` | Rechnungsanschrift und Telefon |
+| `country` | `country:read` | Land der Anschrift |
+| `order` | `order:read` | Bestellnummer und Bestelldatum |
+| `order_customer` | `order_customer:read` | Zuordnung zum Kunden |
+| `state_machine_state` | `state_machine_state:read` | Bestellstatus |
 
-Für Shopware 6 unter **Einstellungen → System → Integrationen** einen Zugang mit Leserechten für Kunden und zugehörige Adressen, Länder und Verkaufskanäle einrichten. Die Kundensuche verwendet die Admin API mit exaktem E-Mail-Filter und lädt die Standard-Rechnungsadresse. Shopware 5 verwendet die Kunden-REST-API mit E-Mail-Filter und anschließender Detailabfrage. Mehrere Konten derselben E-Mail werden separat dargestellt.
+5. **Schreiben, Erstellen und Löschen deaktiviert lassen** und speichern.
 
-**Verbindung testen** prüft die aktuellen Formulareingaben, die Anmeldung und einen minimalen Lesezugriff auf die Kundenliste. Der Test funktioniert vor der Aktivierung und speichert keine Änderungen. Er bestätigt nicht, ob für eine bestimmte Ticket-E-Mail ein Kunde existiert.
+„Status“ bezeichnet den Bestellstatus, nicht Zahlungs- oder Lieferstatus. Bestellpositionen, Zahlungsdaten und Lieferungen werden nicht abgefragt. Bereits im Tab „Allgemein“ gesetzte Rechte können in der Detailansicht ausgegraut sein.
 
-Die gesamte Verbindungskonfiguration wird verschlüsselt in den Metadaten des jeweiligen Postfachs gespeichert; dazu wird FreeScouts `APP_KEY` verwendet. Den Schlüssel mit den Datenbanksicherungen sicher aufbewahren. Das Schlüsselfeld bleibt nach dem Speichern leer. Eine leere Eingabe behält den vorhandenen Schlüssel bei. Werden System, API-Ziel, Benutzer oder Authentifizierung geändert, muss der Schlüssel neu eingegeben werden. Die Checkbox zum Löschen entfernt ihn bei deaktivierter Verbindung. Schlüssel werden auch bei Validierungsfehlern nicht in Formular oder Session-Alteingaben zurückgegeben.
+### 2. Integration erstellen
 
-Für bestehende Installationen gelten die bisherigen `.env`-Werte aus `.env.example` als Shopware-5-Fallback, solange ein Postfach noch keine eigene Konfiguration hat. Beim Speichern wird die Verbindung in die verschlüsselten Postfach-Einstellungen übernommen. Eine ausdrücklich deaktivierte Postfach-Verbindung überschreibt den Fallback. Neue Installationen benötigen keine `.env`-Konfiguration für dieses Modul.
+1. **Einstellungen → System → Integrationen** öffnen.
+2. **Integration anlegen** wählen.
+3. Einen Namen wie **FreeScout Kundenprofil Abruf** vergeben.
+4. Administratorberechtigung ausgeschaltet lassen und die oben erstellte Rolle zuweisen.
+5. **Zugangs-ID / Access Key ID** und **Sicherheitsschlüssel / Secret Access Key** sicher übernehmen.
+6. Die Integration speichern.
 
-Ein FreeScout-API-Modul ist hierfür nicht notwendig. Der Modulendpunkt verwendet die Anmeldung und die bestehende FreeScout-Ticketberechtigung. Er nimmt keine frei übergebene E-Mail entgegen. API-Schlüssel erscheinen nicht im Browser. Alle angezeigten Kundenwerte werden von Blade escaped. API-Fehlertexte und sensible API-Felder werden nicht weitergegeben.
+Der Sicherheitsschlüssel wird in Shopware nur bei Erstellung bzw. Neuerzeugung angezeigt. Ist er nicht mehr verfügbar, **API-Zugangsschlüssel neu generieren** wählen. Dabei ändern sich beide Werte; anschließend beide in FreeScout ersetzen.
+
+Verwendet werden die Schlüssel dieser Integration. Backend-Benutzername, Benutzerpasswort, Verkaufskanal-API-Key und ein kurzlebiger OAuth-Token gehören nicht in die Eingabefelder. Den OAuth-Token fordert das Modul selbst an.
+
+### 3. FreeScout-Postfach einrichten
+
+1. Als FreeScout-Administrator **Verwalten → Postfächer → gewünschtes Postfach → Kundenprofil Abruf** öffnen.
+2. Folgende Werte eintragen:
+
+| FreeScout-Feld | Wert |
+| --- | --- |
+| API-URL | `https://dein-shop.de/api` |
+| Backend-URL | `https://dein-shop.de/admin` |
+| Access-Key-ID | Zugangs-ID der Shopware-Integration |
+| Secret Access Key | Sicherheitsschlüssel derselben Integration |
+
+3. Bei Installation in einem Unterverzeichnis dieses in beiden URLs beibehalten.
+4. **Verbindung testen** wählen. Der Test prüft Anmeldung und Lesezugriff auf Kunden, Bestellungen und Bestellstatus, speichert aber noch nichts.
+5. **Für dieses Postfach aktivieren** anhaken und **Speichern**.
+6. Ein Ticket eines bekannten Shopkunden öffnen und Profil sowie Bestellungen prüfen.
+
+URLs müssen HTTPS verwenden und dürfen keine Zugangsdaten, Query-Parameter oder Fragmente enthalten. Die Backend-URL ist für Direktlinks erforderlich; ohne sie erscheinen Bestellungen als Text.
+
+Ein leeres Secret-Feld behält einen bereits gespeicherten Schlüssel bei. Bei geänderter API-URL oder Access-Key-ID das Secret neu eingeben. Zum Entfernen Verbindung deaktivieren und **Gespeicherten Schlüssel löschen** wählen.
+
+### Bestehende Installation aktualisieren
+
+Gespeicherte Shopware-6-Zugangsdaten pro Postfach bleiben erhalten. Für die Bestellanzeige `order:read`, `order_customer:read` und `state_machine_state:read` zur Rolle ergänzen und den Verbindungstest erneut ausführen. Die frühere Überschriften-Einstellung entfällt; im Boxkopf steht der Kundenname.
+
+## Zuordnung und Sicherheit
+
+Die Bestellabfrage filtert gleichzeitig nach Kunden-ID und der aktuellen Kunden-E-Mail des berechtigten Tickets und prüft die Zuordnung nochmals in der Antwort. Eine geänderte Kunden-ID im Modulendpunkt darf keine Bestellungen eines fremden Kunden liefern. Profil- und Bestellendpunkt prüfen die bestehende Ticketberechtigung.
+
+Die Verbindungskonfiguration liegt verschlüsselt in den Postfach-Metadaten. Dafür wird FreeScouts `APP_KEY` verwendet; diesen mit den Datenbanksicherungen sicher aufbewahren. Nur FreeScout-Administratoren dürfen konfigurieren und testen. Schlüssel werden nicht im Browser oder in Session-Alteingaben ausgegeben.
+
+Direktlinks öffnen die Shopware-Administration in einem neuen Tab. Dort gelten Anmeldung und Rechte des jeweiligen Shopware-Benutzers. Die Integration meldet Supportmitarbeiter nicht automatisch im Admin an.
 
 ## Diagnose-Logging
 
-Ab Version 0.2.1 schreibt das Modul eigene tägliche Dateien unter `storage/logs/customer-systems-YYYY-MM-DD.log` im FreeScout-Verzeichnis. Es werden maximal 14 Tagesdateien vorgehalten; die Rotation erfolgt beim Schreiben neuer Tagesdateien. Der FreeScout-PHP-Benutzer benötigt Schreibrechte auf `storage/logs`.
+Dateien: `storage/logs/customer-systems-YYYY-MM-DD.log`, maximal 14 Tagesdateien. Rotation beim Schreiben neuer Dateien; der PHP-Benutzer benötigt Schreibrechte auf `storage/logs`.
 
-Immer protokolliert werden Verbindungsfehler, Verbindungstests (erfolgreich und fehlgeschlagen), ungültige Konfigurationseingaben, gespeicherte Einstellungen sowie Fehler beim Laden und Speichern der Konfiguration. Eine deaktivierte Verbindung erzeugt standardmäßig keine wiederholten Fehler.
+Fehler, Verbindungstests und Konfigurationsänderungen werden immer protokolliert. **Diagnose-Logging** im Postfach ergänzt erfolgreiche Profil- und Bestellabrufe samt Trefferanzahl. Einträge enthalten Referenz, Postfach-/Ticket-ID, Laufzeit und technische Fehlercodes; unerwartete PHP-Fehler zusätzlich Typ, PHP-Version sowie Moduldateiname und Zeile.
 
-Unter **Postfach → Kundenprofil Abruf → Diagnose-Logging** lassen sich zusätzlich erfolgreiche Kundenabrufe mit Trefferanzahl sowie übersprungene Abrufe bei deaktivierter Verbindung einschalten. Anschließend **Speichern**. Die Einstellung gilt nur für dieses Postfach.
-
-Jeder Eintrag enthält Zeitstempel, Ereignis und eine Referenz. Je nach Vorgang kommen Postfach-ID, Ticket-ID, Shopware-Version, Laufzeit in Millisekunden, Trefferanzahl und ein technischer Fehlercode hinzu. HTTP-Fehler enthalten den Status; Netzwerkfehler die cURL-Fehlernummer. Bei Shopware 6 wird zwischen OAuth-Anmeldung und API-Abfrage unterschieden. Fehlgeschlagene Verbindungstests zeigen die passende Log-Referenz direkt im Formular an.
-
-Es werden keine E-Mail-Adressen, Kundenprofile, URLs, API-Benutzer, API-Schlüssel, OAuth-Tokens, Request-/Response-Inhalte oder ungefilterten Exception-Texte in diese Modul-Logs geschrieben. Ein Schreibfehler des Diagnose-Logs bricht den Abruf nicht ab; in diesem Fall versucht das Modul, einen festen Hinweis mit Referenz in FreeScouts Standard-Log zu hinterlassen.
-
-Ab Version 0.2.2 werden unerwartete PHP-Fehler zusätzlich mit Exception-Typ, PHP-Version, Modul-Dateiname und Zeile protokolliert. Vollständige Serverpfade und rohe Exception-Texte bleiben ausgeblendet. Der Verbindungstest zeigt interne PHP-Fehler, HTTP-Status und bekannte Netzwerkprobleme wie TLS-Zertifikatsfehler direkt an. Veraltete PHP-Aufrufe in cURL-Handling und OAuth-Transport wurden für PHP 8.4/8.5 ersetzt; ein Regressionstest verwendet Laravels strenge Fehlerbehandlung.
-
-Log auf einem Linux-Server ansehen (im FreeScout-Verzeichnis):
+Keine E-Mail-Adressen, Kunden- oder Bestellinhalte, URLs, Schlüssel, Tokens oder rohen Exception-Texte im Modul-Log. Fehlgeschlagene Verbindungstests zeigen eine passende Log-Referenz an.
 
 ```sh
 tail -f storage/logs/customer-systems-$(date +%F).log
 ```
 
-Beispiel:
-
-```text
-customer-systems.WARNING: connection_test.failed {"reference":"a1b2c3d4e5f60708","mailbox_id":2,"duration_ms":815,"system":"shopware6","reason":"authentication_failed","http_status":401,"curl_errno":0,"phase":"oauth"}
-```
-
-Häufige Diagnosewerte:
-
-| Wert | Bedeutung |
+| Fehler | Prüfung |
 | --- | --- |
-| HTTP 401 / `authentication_failed` | Zugangsdaten abgelehnt |
-| HTTP 403 / `permission_denied` | Fehlende API-Leserechte |
-| cURL 6 | DNS-Auflösung fehlgeschlagen |
-| cURL 7 | Verbindung zum Server fehlgeschlagen |
+| HTTP 401 bei OAuth | Access-Key-ID und Secret derselben Integration neu eintragen |
+| HTTP 403 | Die sechs Leserechte und ihre Zuweisung an die Integration prüfen |
+| HTTP 3xx | Endgültige HTTPS-API-URL verwenden |
+| cURL 6 / 7 | DNS bzw. Netzwerk vom FreeScout-Server prüfen |
 | cURL 28 | Zeitüberschreitung |
-| cURL 60 | TLS-Zertifikat konnte nicht validiert werden |
-| `invalid_response` | Unerwartetes Antwortformat oder abweichende Kundenzuordnung |
-| `credentials_unreadable` | Gespeicherte Verbindung nicht entschlüsselbar |
+| cURL 60 | CA-Zertifikate und Zertifikatskette auf dem FreeScout-Server prüfen |
+| `credentials_unreadable` | FreeScout-`APP_KEY` prüfen; Verbindung gegebenenfalls neu speichern |
+| Interner PHP-Fehler | Angezeigte Datei, Zeile und Referenz prüfen; aktuelle Version verwenden |
 
-## Self-Updates und Releases
+## Updates und Releases
 
-Das Modul verwendet FreeScouts eingebauten Modul-Updater wie in [Sidebar-Webhook PR #22](https://github.com/fulldecent/freescout-sidebar-webhook/pull/22). Voraussetzung ist FreeScout ab 1.8.124 und ein für den FreeScout-Server öffentlich erreichbares GitHub-Release.
+Der native FreeScout-Updater nutzt wie in [Sidebar-Webhook PR #22](https://github.com/fulldecent/freescout-sidebar-webhook/pull/22) öffentlich erreichbare Release-Dateien: `version.txt` mit der Versionsnummer und `CustomerSystems.zip` mit Wurzelordner `CustomerSystems/`.
 
-Der Workflow `.github/workflows/release.yml` erzeugt bei einem Versionstag `X.Y.Z` zwei Release-Assets:
+Updates unter **Verwalten → Module** oder mit `php artisan freescout:module-update`. Private GitHub-Releases werden nicht unterstützt.
 
-- `version.txt`: ausschließlich die Versionsnummer, für Weboberfläche und CLI-Updater.
-- `CustomerSystems.zip`: enthält genau den Modulordner `CustomerSystems/`, damit FreeScout die bestehende Installation aktualisiert.
-
-Die Update-URLs in `module.json` zeigen auf [cfoellmann/freescout_CustomerSystems](https://github.com/cfoellmann/freescout_CustomerSystems). Der Build setzt diese Felder im Release-Paket zusätzlich anhand von `github.repository`, sodass auch ein bewusst in einem anderen Repository gebautes Paket dessen Releases verwendet. Das Quellmanifest bleibt beim Build unverändert.
-
-Für ein Release:
-
-1. Die Änderungen inklusive Workflow in `cfoellmann/freescout_CustomerSystems` übernehmen.
-2. `version` in `Modules/CustomerSystems/module.json` erhöhen und committen.
-3. Einen identischen Tag ohne `v` setzen und pushen, beispielsweise `git tag 0.1.1` und `git push origin 0.1.1`. Der Build bricht ab, falls Tag und Modulversion abweichen.
-4. Der Workflow erstellt das Release mit beiden Assets. Ein vorhandenes Release kann über **Actions → Release → Run workflow** mit seinem Tag erneut bestückt werden.
-
-Neue Releases werden mit Assets veröffentlicht; bei bestehenden Releases werden die Assets wie im Vorbild ersetzt. Für die Erstinstallation und eine bereits installierte Version 0.1.0 ohne Update-URLs einmal `CustomerSystems.zip` entpacken und `CustomerSystems/` nach `Modules/` kopieren. Anschließend erfolgen Updates über die FreeScout-Modulseite bzw. `php artisan freescout:module-update`. Es wird kein eigener Hintergrund-Updater installiert. Das Shopware-Begleitplugin ist separat zu aktualisieren und bleibt außerhalb des FreeScout-ZIPs.
-
-Lokalen Release-Build mit dem tatsächlichen Repository prüfen:
+Für ein Release die Version in `Modules/CustomerSystems/module.json` erhöhen, committen und einen identischen Tag ohne `v` pushen. Der Workflow prüft Version und Tests, baut beide Assets und veröffentlicht sie. Bestehende Tags können über **Actions → Release → Run workflow** erneut gebaut werden.
 
 ```powershell
 python -m unittest discover -s tests -p test_release.py -v
-python tools/build_release.py --tag 0.2.3 --repository cfoellmann/freescout_CustomerSystems
+python tools/build_release.py --tag 0.3.0 --repository cfoellmann/freescout_CustomerSystems
 ```
 
-Die Dateien liegen danach in `dist/`. Ein echtes Update einschließlich GitHub-Weiterleitungen und FreeScout-Installation muss nach dem ersten veröffentlichten Release geprüft werden. Private GitHub-Releases funktionieren mit diesen anonym abgerufenen URLs nicht.
-
-## Kundenprofil direkt im Shopware-Backend öffnen
-
-Jeder Treffer erhält den Link **Kundenprofil im Shopware-Backend öffnen**, sofern eine Backend-URL im Postfach konfiguriert ist. Der Link öffnet einen neuen Tab und verwendet die Shopware-Kunden-ID, nicht die Kundennummer.
-
-Bei Shopware 6 öffnet der Link die Administration unter `#/sw/customer/detail/<UUID>/base`. Anmeldung und Shopware-Benutzerrechte gelten weiterhin. Der folgende Abschnitt betrifft ausschließlich Shopware 5.
-
-Für das gezielte Öffnen der Detailansicht wird ein kleines Begleitplugin mitgeliefert. Hintergrund: Der Shopware-5.7-Kundencontroller benötigt `action: 'detail'`; die normale Backend-Start-URL reicht diese Eigenschaft nicht an die Kundenanwendung weiter.
-
-1. Den Ordner `Shopware5/CustomerSystemsLink` nach `custom/plugins/CustomerSystemsLink` der Shopware-Installation kopieren.
-2. Das Plugin im Shopware-Plugin-Manager installieren und aktivieren; anschließend den Backend-/Template-Cache leeren und das Backend neu laden.
-3. Mit einer bestehenden Shopware-Backend-Sitzung den Link aus FreeScout öffnen. Beispiel: `https://shop.example.com/backend/?customerSystemsCustomerId=12`.
-
-Das Begleitplugin lauscht auf den Backend-Start und öffnet das Kundenmodul mit `action: 'detail'` und `params.customerId`. Shopware-Anmeldung und Benutzerrechte gelten weiterhin. Nach einer erstmaligen Anmeldung den Link gegebenenfalls erneut öffnen. Ohne Begleitplugin öffnet sich lediglich das normale Backend.
-
-## Prüfung und verbleibende Abnahme
-
-Lokal ausführbar, ohne FreeScout oder echte Zugangsdaten:
+## Entwicklung und Prüfung
 
 ```powershell
 php tests/logging.php
+php tests/orders.php
 php tests/php_compatibility.php
-Get-ChildItem Modules,Shopware5,tests -Recurse -Filter *.php | Where-Object Name -NotLike '*.blade.php' | ForEach-Object { php -l $_.FullName }
+Get-ChildItem Modules,tests -Recurse -Filter *.php | Where-Object Name -NotLike '*.blade.php' | ForEach-Object { php -l $_.FullName }
 node --check Modules/CustomerSystems/Public/js/sidebar.js
 node --check Modules/CustomerSystems/Public/js/settings.js
 ```
 
-Die Tests verwenden simulierte API-Antworten für beide Shopware-Systeme, E-Mail-Zuordnung, Mehrfachtreffer, abweichende Kundendaten, Feldbegrenzung, OAuth und Link-Erzeugung. Postfachtrennung, Credential-Wechsel und Controller-Berechtigungen werden mit Framework-Adaptern geprüft; diese ersetzen keinen Integrationstest gegen FreeScouts tatsächliche Datenbank und Verschlüsselung. Die tatsächlichen FreeScout- und Shopware-Versionen wurden noch nicht angegeben; die Zielinstallation ist daher noch nicht live geprüft. Entwicklung orientiert sich an der FreeScout-Laravel-5.5-Modulstruktur sowie Shopware 5.7 und der Shopware-6-Admin-API; PHP-Code verwendet Syntax ab PHP 7.1.
-
-Vor Einsatz in der Zielinstallation prüfen:
-
-- Bekanntes Ticket zeigt den richtigen Kunden und dessen Rechnungsanschrift.
-- Kein Treffer, doppelte E-Mail und nicht erreichbares Shopware ergeben verständliche Meldungen.
-- Benutzer ohne Zugriff auf das Ticket erhalten am Modulendpunkt HTTP 403.
-- Der Backend-Link öffnet genau die gewählte Kundendetailansicht, auch aus einem Shop-Unterverzeichnis.
-- Shopware-Rechte werden für einen eingeschränkten Backend-Benutzer eingehalten.
-- Zwei Postfächer verwenden unabhängig voneinander unterschiedliche Verbindungen; Deaktivieren unterbindet API-Abfragen.
-- Einstellungen, Speicherung und Verbindungstest sind für Nicht-Administratoren gesperrt.
+Die Tests verwenden simulierte API-Antworten und Framework-Adapter für Zuordnung, Postfachtrennung, Berechtigungen, OAuth, Bestellungen, Links und Datenfilterung. Darstellung und Rechte sind zusätzlich in der Zielinstallation zu prüfen. PHP 8.5 wird mit strenger Fehlerbehandlung geprüft.
 
 ## Quellen
 
-- [FreeScout-Modulentwicklung](https://github.com/freescout-help-desk/freescout/wiki/Modules-Development)
-- [FreeScout-Sidebar-Hook](https://github.com/freescout-help-desk/freescout/blob/master/resources/views/conversations/view.blade.php)
-- [Shopware-5-Kunden-API](https://github.com/shopware5/shopware/blob/5.7/engine/Shopware/Components/Api/Resource/Customer.php)
-- [Shopware-Kundendetailaufruf](https://github.com/shopware5/shopware/blob/5.7/themes/Backend/ExtJs/backend/customer/controller/main.js)
-- [Shopware-Backend-Startparameter](https://github.com/shopware5/shopware/blob/5.7/themes/Backend/ExtJs/backend/index/header.tpl)
-- [Shopware-6-Admin-API und OAuth](https://developer.shopware.com/docs/guides/development/integrations-api/)
-- [Shopware-6-Suchkriterien](https://developer.shopware.com/docs/guides/development/integrations-api/search-criteria.html)
 - [Shopware-6-Integrationen](https://docs.shopware.com/de/shopware-6-de/einstellungen/system/integrationen)
+- [Shopware Benutzer & Rechte](https://docs.shopware.com/de/shopware-6-de/einstellungen/System/benutzer)
+- [Shopware Admin API und OAuth](https://developer.shopware.com/docs/guides/development/integrations-api/)
+- [Shopware Suchkriterien](https://developer.shopware.com/docs/guides/development/integrations-api/search-criteria.html)
+- [FreeScout-Modulentwicklung](https://github.com/freescout-help-desk/freescout/wiki/Modules-Development)
+- [Native Liste „Vorherige Gespräche“](https://github.com/freescout-help-desk/freescout/blob/master/resources/views/conversations/partials/prev_convs_short.blade.php)

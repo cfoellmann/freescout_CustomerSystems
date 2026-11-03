@@ -29,6 +29,7 @@ namespace {
 
     require __DIR__.'/../Modules/CustomerSystems/Http/Controllers/SettingsController.php';
     require __DIR__.'/../Modules/CustomerSystems/Http/Controllers/SidebarController.php';
+    require __DIR__.'/../Modules/CustomerSystems/Http/Controllers/OrdersController.php';
 
     class TestUser {
         public $admin = false;
@@ -77,11 +78,15 @@ namespace {
     \App\Conversation::$record = (object) ['id' => 101, 'mailbox_id' => 1, 'customer_email' => 'test@example.com', 'mailbox' => \App\Mailbox::$records[1]];
     $sidebar = new SidebarController();
     failsWith(function () use ($sidebar) { $sidebar->show(1); }, 'http_403');
+    $orderController = new \Modules\CustomerSystems\Http\Controllers\OrdersController();
+    failsWith(function () use ($orderController) { $orderController->show(1, '0123456789abcdef0123456789abcdef'); }, 'http_403');
     $GLOBALS['test_user']->canView = true;
     // Disabled mailboxes must not contact either API.
     // Supply a log adapter because FreeScout logs the controlled error code.
     $response = $sidebar->show(1);
     check($response->data['error'] === 'disabled' && $response->data['customers'] === [], 'Disabled mailbox performed lookup');
+    $orderResponse = $orderController->show(1, '0123456789abcdef0123456789abcdef');
+    check($orderResponse->data['error'] === 'disabled' && $orderResponse->data['orders'] === [], 'Disabled mailbox performed order lookup');
     check(isset($controller->test(1, new Request($invalid))->data['reference']), 'Failed test must expose a log reference');
     echo 'OK: '.$passed." total checks including controller authorization passed\n";
 }

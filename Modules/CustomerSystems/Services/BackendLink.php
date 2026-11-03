@@ -4,7 +4,15 @@ namespace Modules\CustomerSystems\Services;
 
 class BackendLink
 {
-    public static function customer($backendUrl, $id, $type = 'shopware5')
+    public static function order($backendUrl, $id)
+    {
+        // Reuse the HTTPS/base-URL and ID validation shared with customer links.
+        if (!self::customer($backendUrl, $id)) { return null; }
+        $url = rtrim(trim((string) $backendUrl), '/');
+        return $url.'#/sw/order/detail/'.strtolower($id).'/general';
+    }
+
+    public static function customer($backendUrl, $id)
     {
         $url = rtrim(trim((string) $backendUrl), '/');
         $parts = parse_url($url);
@@ -13,11 +21,7 @@ class BackendLink
             || isset($parts['fragment'])) {
             return null;
         }
-        if ($type === 'shopware6') {
-            return preg_match('/^[a-f0-9]{32}$/i', (string) $id)
-                ? $url.'#/sw/customer/detail/'.strtolower($id).'/base' : null;
-        }
-        if (!ctype_digit((string) $id) || (int) $id < 1) { return null; }
-        return $url.'/?'.http_build_query(['customerSystemsCustomerId' => (string) $id], '', '&', PHP_QUERY_RFC3986);
+        return preg_match('/^[a-f0-9]{32}$/i', (string) $id)
+            ? $url.'#/sw/customer/detail/'.strtolower($id).'/base' : null;
     }
 }

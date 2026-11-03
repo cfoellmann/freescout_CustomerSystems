@@ -43,7 +43,8 @@ class DiagnosticLog
         // Only known event names and typed fields may reach the logger. Never pass a request,
         // exception, API response, URL, email or connection configuration to Monolog.
         $events = ['lookup.succeeded', 'lookup.failed', 'lookup.skipped', 'connection_test.succeeded',
-            'connection_test.failed', 'settings.saved', 'settings.rejected', 'settings.load_failed', 'settings.save_failed'];
+            'connection_test.failed', 'settings.saved', 'settings.rejected', 'settings.load_failed', 'settings.save_failed',
+            'orders.succeeded', 'orders.failed'];
         if (!in_array($event, $events, true)) { return null; }
         $safe = ['reference' => substr(hash('sha256', uniqid('', true)), 0, 16)];
         foreach (['mailbox_id', 'conversation_id', 'duration_ms', 'match_count'] as $key) {
@@ -51,7 +52,7 @@ class DiagnosticLog
                 $safe[$key] = max(0, (int) $context[$key]);
             }
         }
-        if (in_array($context['system'] ?? null, ['shopware5', 'shopware6'], true)) {
+        if (($context['system'] ?? null) === 'shopware6') {
             $safe['system'] = $context['system'];
         }
         foreach (['enabled', 'debug_logging'] as $key) {
@@ -65,7 +66,7 @@ class DiagnosticLog
             if ($error instanceof ApiException) {
                 $safe['http_status'] = $error->httpStatus;
                 $safe['curl_errno'] = $error->curlErrno;
-                $safe['phase'] = $error->phase === 'oauth' ? 'oauth' : 'api';
+                $safe['phase'] = in_array($error->phase, ['oauth', 'orders'], true) ? $error->phase : 'api';
             }
         }
         $level = $error && !in_array($safe['reason'], ['disabled', 'no_email'], true) ? 'warning' : 'info';

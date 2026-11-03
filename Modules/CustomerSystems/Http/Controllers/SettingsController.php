@@ -55,7 +55,7 @@ class SettingsController extends Controller
             // Never flash the API key/secret into session old input or redisplay it.
             return redirect()->route('mailboxes.customersystems', ['id' => $id])
                 ->withErrors(['connection' => $error->getMessage()])
-                ->withInput($request->only(['enabled', 'debug_logging', 'sidebar_title', 'type', 'url', 'backend_url', 'username', 'auth']));
+                ->withInput($request->only(['enabled', 'debug_logging', 'url', 'backend_url', 'username']));
         }
         try {
             (new ConnectionSettings())->save($mailbox, $settings);
@@ -80,7 +80,7 @@ class SettingsController extends Controller
             $input['enabled'] = '1';
             $settings = ConnectionSettings::prepare($input, $this->current($mailbox));
             CustomerConnection::client($settings)->testConnection();
-            $message = 'Verbindung erfolgreich. Anmeldung und Lesezugriff auf Kunden funktionieren. Änderungen bitte anschließend speichern.';
+            $message = 'Verbindung erfolgreich. Anmeldung und Lesezugriff auf Kunden, Bestellungen und Bestellstatus funktionieren. Änderungen bitte anschließend speichern.';
             $ok = true;
         } catch (\InvalidArgumentException $error) {
             $failure = $error;

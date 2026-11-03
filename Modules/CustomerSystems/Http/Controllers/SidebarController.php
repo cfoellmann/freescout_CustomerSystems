@@ -36,8 +36,9 @@ class SidebarController extends Controller
                 $customers = $client->findByEmail($email);
                 foreach ($customers as &$customer) {
                     $customer['backend_url'] = BackendLink::customer(
-                        $settings['backend_url'], $customer['id'], $settings['type']
+                        $settings['backend_url'], $customer['id']
                     );
+                    $customer['orders_url'] = route('customersystems.orders', ['id' => $conversation->id, 'customerId' => $customer['id']]);
                 }
                 unset($customer);
                 if (!empty($settings['debug_logging'])) {

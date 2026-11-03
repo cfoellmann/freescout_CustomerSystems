@@ -37,7 +37,8 @@ class JsonHttpClient
         // Dropping the final reference closes resources (PHP 7) and handles (PHP 8).
         // curl_close() is deprecated in PHP 8.5 and can become an ErrorException in Laravel.
         unset($handle);
-        $phase = substr($url, -12) === '/oauth/token' ? 'oauth' : 'api';
+        $phase = substr($url, -12) === '/oauth/token' ? 'oauth'
+            : (substr($url, -13) === '/search/order' ? 'orders' : 'api');
         if ($ok === false) { throw new ApiException('unavailable', $status, $errno, $phase); }
         if ($status === 401) { throw new ApiException('authentication_failed', $status, $errno, $phase); }
         if ($status === 403) { throw new ApiException('permission_denied', $status, $errno, $phase); }

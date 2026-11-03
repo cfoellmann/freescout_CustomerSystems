@@ -1,20 +1,29 @@
 @if ($error)
-    <p class="customer-section">{{ \Modules\CustomerSystems\Services\ConnectionError::message($error) }}</p>
+    <div class="panel panel-default"><div class="panel-body">
+        <p class="customer-section">{{ \Modules\CustomerSystems\Services\ConnectionError::message($error) }}</p>
+        <button type="button" class="customer-systems-retry btn btn-link btn-xs sidebar-block-link">Aktualisieren</button>
+    </div></div>
 @elseif (!count($customers))
-    <p class="customer-section">Kein Shopware-Kunde für {{ $email }} gefunden.</p>
+    <div class="panel panel-default"><div class="panel-body">
+        <p class="customer-section">Kein Shopware-Kunde für {{ $email }} gefunden.</p>
+        <button type="button" class="customer-systems-retry btn btn-link btn-xs sidebar-block-link">Aktualisieren</button>
+    </div></div>
 @else
     @if (count($customers) > 1)
         <p class="text-warning small">Mehrere Kunden mit dieser E-Mail gefunden. Bitte die Kundennummer prüfen.</p>
     @endif
     @foreach ($customers as $record)
-        <div class="customer-section">
-            <div class="clearfix">
-                <span class="customer-name">{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}
+        <div class="panel panel-default">
+            <div class="panel-heading"><h4 class="panel-title"><div>
+                <strong class="small">{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}</strong>
                 @if ($record['backend_url'])
                     <a href="{{ $record['backend_url'] }}" target="_blank" rel="noopener noreferrer" class="small" title="Kundenprofil im Shopware-Backend öffnen" aria-label="Kundenprofil im Shopware-Backend öffnen"><i class="glyphicon glyphicon-new-window" aria-hidden="true"></i></a>
                 @endif
-                </span>
-            </div>
+            </div></h4></div>
+            <div class="panel-body"><div class="customer-section">
+                <div class="sidebar-block-header2"><strong>{{ $record['name'] ?: ($record['company'] ?: 'Kunde') }}</strong>
+                    @if ($record['backend_url'])<a href="{{ $record['backend_url'] }}" target="_blank" rel="noopener noreferrer" title="Kundenprofil im Shopware-Backend öffnen" aria-label="Kundenprofil im Shopware-Backend öffnen"><i class="glyphicon glyphicon-new-window" aria-hidden="true"></i></a>@endif
+                </div>
             @if ($record['company'] !== '' && $record['company'] !== $record['name'])
                 <div>{{ $record['company'] }}</div>
             @endif
@@ -37,6 +46,15 @@
                     @if ($record['country'] !== '')<div>{{ $record['country'] }}</div>@endif
                 </div></div>
             @endif
+            </div></div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><h4 class="panel-title"><div><strong class="small">Letzte Bestellungen</strong></div></h4></div>
+            <div class="panel-body">
+                <div class="sidebar-block-header2"><strong>Letzte Bestellungen</strong></div>
+                <div class="customer-systems-orders" data-url="{{ $record['orders_url'] }}" aria-live="polite"><p class="customer-section">Bestellungen werden geladen …</p></div>
+                <button type="button" class="customer-systems-retry btn btn-link btn-xs sidebar-block-link"><i class="glyphicon glyphicon-refresh" aria-hidden="true"></i> Aktualisieren</button>
+            </div>
         </div>
     @endforeach
 @endif

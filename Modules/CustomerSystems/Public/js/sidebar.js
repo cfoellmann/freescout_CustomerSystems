@@ -1,5 +1,19 @@
 (function ($) {
     'use strict';
+    function loadOrders(panel) {
+        panel.find('.customer-systems-orders').each(function () {
+            var target = $(this);
+            $.ajax({ url: target.attr('data-url'), dataType: 'html', timeout: 25000, cache: false })
+                .done(function (html) {
+                    if (/<(?:html|form|script)[\s>]/i.test(html)) {
+                        target.text('Unerwartete Antwort. Bitte FreeScout neu laden.');
+                    } else { target.html(html); }
+                })
+                .fail(function (xhr) {
+                    target.text(xhr.status === 403 ? 'Keine Berechtigung für dieses Ticket.' : 'Bestellungen konnten nicht geladen werden. Bitte aktualisieren.');
+                });
+        });
+    }
     function load(panel) {
         var result = panel.find('.customer-systems-results');
         var button = panel.find('.customer-systems-retry');
@@ -14,6 +28,7 @@
                     result.text('Unerwartete Antwort. Bitte FreeScout neu laden.');
                 } else {
                     result.html(html);
+                    loadOrders(panel);
                 }
             })
             .fail(function (xhr) {
@@ -28,9 +43,9 @@
     $(function () {
         $('.customer-systems').each(function () {
             var panel = $(this), sidebar = panel.closest('#conv-layout-customer');
-            // The extension hook is after the core customer profile. Move our native panel
-            // to the first position without changing FreeScout core or other modules.
-            if (sidebar.length) { sidebar.prepend(panel); }
+            // Preserve the native customer profile above all sidebar boxes.
+            var firstBox = sidebar.find('.conv-sidebar-block').not(panel).first();
+            if (firstBox.length) { panel.insertBefore(firstBox); }
             load(panel);
         });
     });

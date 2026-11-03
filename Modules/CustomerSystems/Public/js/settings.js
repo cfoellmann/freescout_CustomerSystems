@@ -3,14 +3,6 @@
     $(function () {
         $('.customer-systems-settings').each(function () {
             var form = $(this);
-            function update() {
-                var type = form.find('[name="type"]').val();
-                form.find('[data-sw]').each(function () {
-                    $(this).toggle($(this).attr('data-sw') === type);
-                });
-            }
-            form.find('[name="type"]').on('change', update);
-            update();
             form.on('input change', 'input, select', function () {
                 form.find('.customer-systems-test-result').empty().removeClass('alert alert-success alert-danger');
             });

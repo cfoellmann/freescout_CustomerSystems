@@ -26,7 +26,13 @@
             });
     }
     $(function () {
-        $('.customer-systems').each(function () { load($(this)); });
+        $('.customer-systems').each(function () {
+            var panel = $(this), sidebar = panel.closest('#conv-layout-customer');
+            // The extension hook is after the core customer profile. Move our native panel
+            // to the first position without changing FreeScout core or other modules.
+            if (sidebar.length) { sidebar.prepend(panel); }
+            load(panel);
+        });
     });
     $(document).on('click', '.customer-systems-retry', function () {
         load($(this).closest('.customer-systems'));

@@ -19,6 +19,12 @@
                   data-test-url="{{ route('mailboxes.customersystems.test', ['id' => $mailbox->id]) }}">
                 {{ csrf_field() }}
                 <input type="hidden" name="enabled" value="0">
+                <h3>Anzeige</h3>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="cs-title">Sidebar-Überschrift</label>
+                    <div class="col-sm-9"><input id="cs-title" type="text" name="sidebar_title" class="form-control" maxlength="120" value="{{ old('sidebar_title', $settings['sidebar_title'] ?? 'Kundendetails') }}" placeholder="Kundendetails">
+                        <p class="help-block">Gilt für dieses Postfach. Leer lassen für „Kundendetails“.</p></div>
+                </div>
                 <h3>Shopware-Verbindung</h3>
                 <div class="form-group"><div class="col-sm-offset-3 col-sm-9"><div class="checkbox">
                     <label><input type="checkbox" name="enabled" value="1" @if (old('enabled', $settings['enabled'])) checked @endif> Für dieses Postfach aktivieren</label>

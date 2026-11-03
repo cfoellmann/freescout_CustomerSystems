@@ -40,7 +40,7 @@ class ConnectionSettings
     public static function defaults()
     {
         return ['enabled' => false, 'debug_logging' => false, 'type' => 'shopware5', 'url' => '',
-            'backend_url' => '', 'username' => '', 'api_key' => '', 'auth' => 'digest'];
+            'backend_url' => '', 'username' => '', 'api_key' => '', 'auth' => 'digest', 'sidebar_title' => 'Kundendetails'];
     }
 
     public static function publicValues(array $settings)
@@ -73,6 +73,10 @@ class ConnectionSettings
         }
         $settings['enabled'] = in_array($input['enabled'] ?? '0', ['1', 1, true], true);
         $settings['debug_logging'] = in_array($input['debug_logging'] ?? '0', ['1', 1, true], true);
+        if (!preg_match('/^[^\x00-\x1f\x7f]{0,120}$/u', $settings['sidebar_title'])) {
+            throw new InvalidArgumentException('Die Sidebar-Überschrift darf maximal 120 Zeichen lang sein und keine Zeilenumbrüche enthalten.');
+        }
+        if ($settings['sidebar_title'] === '') { $settings['sidebar_title'] = 'Kundendetails'; }
         if (!in_array($settings['type'], ['shopware5', 'shopware6'], true)
             || !in_array($settings['auth'], ['basic', 'digest'], true)) {
             throw new InvalidArgumentException('Bitte ein gültiges Shopware-System und Authentifizierungsverfahren wählen.');

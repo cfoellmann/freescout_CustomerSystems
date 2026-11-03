@@ -30,7 +30,14 @@ class CustomerSystemsServiceProvider extends ServiceProvider
 
         \Eventy::addAction('conversation.after_customer_sidebar', function ($conversation) {
             if (auth()->check() && auth()->user()->can('view', $conversation)) {
-                echo view('customersystems::sidebar', ['conversation' => $conversation])->render();
+                $title = 'Kundendetails';
+                try {
+                    $settings = (new \Modules\CustomerSystems\Services\ConnectionSettings())->load($conversation->mailbox);
+                    $title = $settings['sidebar_title'] ?: $title;
+                } catch (\Throwable $error) {
+                    // Keep rendering the ticket; the async endpoint reports configuration failures.
+                }
+                echo view('customersystems::sidebar', ['conversation' => $conversation, 'title' => $title])->render();
             }
         }, 20, 1);
     }

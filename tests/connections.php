@@ -50,6 +50,16 @@ foreach (['http://shop.example.com/api', 'https://user:pass@shop.example.com/api
     } catch (InvalidArgumentException $expected) { check(true, 'Unsafe URL must be rejected'); }
 }
 $store = new ConnectionSettings();
+check(ConnectionSettings::defaults()['sidebar_title'] === 'Kundendetails', 'Default sidebar heading incorrect');
+$customTitle = ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => '  Kunden aus dem Shop  ', 'api_key' => '']), $settings);
+check($customTitle['sidebar_title'] === 'Kunden aus dem Shop' && $customTitle['api_key'] === 'secret', 'Heading change must preserve connection credentials');
+check(ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => '']), $settings)['sidebar_title'] === 'Kundendetails', 'Empty heading must reset default');
+foreach ([str_repeat('a', 121), "Kunde\nTitel", ['bad']] as $badTitle) {
+    try {
+        ConnectionSettings::prepare(array_merge($settings, ['sidebar_title' => $badTitle]), $settings);
+        throw new RuntimeException('Invalid heading accepted');
+    } catch (InvalidArgumentException $expected) { check(true, 'Invalid heading must be rejected'); }
+}
 $mailboxA = new TestMailbox();
 $mailboxB = new TestMailbox();
 $store->save($mailboxA, $settings);

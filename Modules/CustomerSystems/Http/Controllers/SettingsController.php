@@ -55,7 +55,7 @@ class SettingsController extends Controller
             // Never flash the API key/secret into session old input or redisplay it.
             return redirect()->route('mailboxes.customersystems', ['id' => $id])
                 ->withErrors(['connection' => $error->getMessage()])
-                ->withInput($request->only(['enabled', 'debug_logging', 'type', 'url', 'backend_url', 'username', 'auth']));
+                ->withInput($request->only(['enabled', 'debug_logging', 'sidebar_title', 'type', 'url', 'backend_url', 'username', 'auth']));
         }
         try {
             (new ConnectionSettings())->save($mailbox, $settings);

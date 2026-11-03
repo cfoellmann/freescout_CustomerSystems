@@ -2,7 +2,7 @@
 
 FreeScout-Modul für **Shopware 5 und Shopware 6**. Die Zuordnung erfolgt über die `customer_email` des geöffneten Tickets. Die Verbindung lässt sich pro Postfach konfigurieren. **büro+ wird als ausgegraute, noch nicht verfügbare Verbindung angezeigt.** Der technische Modulordner bleibt `CustomerSystems` und der Alias `customersystems`.
 
-Angezeigt werden Kundennummer, Shopware-ID, Shop-ID, Firma, Name, E-Mail, Telefon und Rechnungsanschrift. Die Kundendaten laden nach dem Ticket asynchron. Mehrere Treffer werden einzeln angezeigt; bei mehr als fünf Treffern fordert das Modul zur Prüfung im Shop auf. Es verändert keine Daten und speichert keine Shopware-Kundendaten in FreeScout.
+Angezeigt werden Kundennummer, Firma, Name, E-Mail, Telefon und Rechnungsanschrift. Technische Shopware- und Verkaufskanal-IDs bleiben ausgeblendet. Die Kundendaten laden nach dem Ticket asynchron. Mehrere Treffer werden einzeln angezeigt; bei mehr als fünf Treffern fordert das Modul zur Prüfung im Shop auf. Es verändert keine Daten und speichert keine Shopware-Kundendaten in FreeScout.
 
 ## Installation in FreeScout
 
@@ -13,6 +13,8 @@ Angezeigt werden Kundennummer, Shopware-ID, Shop-ID, Firma, Name, E-Mail, Telefo
 5. Für Shopware-5-Backend-Direktlinks zusätzlich das unten beschriebene Begleitplugin installieren. Shopware 6 benötigt kein Begleitplugin.
 
 ## Verbindung pro Postfach
+
+Ab Version 0.2.3 steht der Block an erster Stelle der rechten Ticket-Sidebar und verwendet FreeScouts native Panel-, Kontakt- und Adressgestaltung. Die Überschrift lautet standardmäßig **Kundendetails**. Unter **Postfach → Kundenprofil Abruf → Anzeige → Sidebar-Überschrift** kann sie pro Postfach geändert werden; ein leeres Feld setzt den Standard zurück. Das kleine Symbol hinter dem Kundennamen öffnet das Shopware-Kundenprofil in einem neuen Tab, sofern eine Backend-URL konfiguriert ist. Technische IDs werden weiterhin intern für den Direktlink verwendet, aber nicht mehr angezeigt.
 
 Die Einstellungsseite ist ausschließlich für FreeScout-Administratoren zugänglich. Auch Speichern und Verbindungstest prüfen die Administratorrolle. Konfigurierbar sind Aktivierung, System (Shopware 5 oder 6), API-URL, optionale Backend-URL, Benutzer / Access-Key-ID, API-Key / Secret und bei Shopware 5 Digest oder Basic.
 
@@ -97,7 +99,7 @@ Lokalen Release-Build mit dem tatsächlichen Repository prüfen:
 
 ```powershell
 python -m unittest discover -s tests -p test_release.py -v
-python tools/build_release.py --tag 0.2.2 --repository cfoellmann/freescout_CustomerSystems
+python tools/build_release.py --tag 0.2.3 --repository cfoellmann/freescout_CustomerSystems
 ```
 
 Die Dateien liegen danach in `dist/`. Ein echtes Update einschließlich GitHub-Weiterleitungen und FreeScout-Installation muss nach dem ersten veröffentlichten Release geprüft werden. Private GitHub-Releases funktionieren mit diesen anonym abgerufenen URLs nicht.

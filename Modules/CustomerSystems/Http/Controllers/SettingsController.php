@@ -9,6 +9,7 @@ use Modules\CustomerSystems\Services\ConnectionSettings;
 use Modules\CustomerSystems\Services\ConnectionError;
 use Modules\CustomerSystems\Services\CustomerConnection;
 use Modules\CustomerSystems\Services\DiagnosticLog;
+use Modules\CustomerSystems\Services\BueroPlusSettings;
 
 class SettingsController extends Controller
 {
@@ -39,9 +40,19 @@ class SettingsController extends Controller
             $warning = ConnectionError::message('credentials_unreadable');
             (new DiagnosticLog())->record('settings.load_failed', ['mailbox_id' => $mailbox->id], $error);
         }
+        $bueroWarning = null;
+        try {
+            $buero = (new BueroPlusSettings())->load($mailbox);
+        } catch (\RuntimeException $error) {
+            $buero = BueroPlusSettings::defaults();
+            $bueroWarning = ConnectionError::message('credentials_unreadable');
+            (new DiagnosticLog())->record('settings.load_failed', ['mailbox_id' => $id, 'system' => 'bueroplus'], $error);
+        }
         return response()->view('customersystems::settings', [
             'mailbox' => $mailbox, 'settings' => ConnectionSettings::publicValues($current),
             'hasSecret' => !empty($current['api_key']), 'warning' => $warning,
+            'bueroSettings' => BueroPlusSettings::publicValues($buero),
+            'bueroHasSecret' => !empty($buero['client_secret']), 'bueroWarning' => $bueroWarning,
         ])->header('Cache-Control', 'no-store, private');
     }
 

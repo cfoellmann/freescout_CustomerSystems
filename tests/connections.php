@@ -4,6 +4,7 @@ require __DIR__.'/helpers.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/BackendLink.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/OrderSummary.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/ConnectionSettings.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/BueroPlusSettings.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Client.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/Shopware6Transport.php';
 require __DIR__.'/../Modules/CustomerSystems/Services/JsonHttpClient.php';

@@ -17,4 +17,8 @@ Route::group([
         ->where('id', '[0-9]+')->name('mailboxes.customersystems.save');
     Route::post('/mailbox/customer-systems/{id}/test', 'SettingsController@test')
         ->middleware('throttle:10,1')->where('id', '[0-9]+')->name('mailboxes.customersystems.test');
+    Route::post('/mailbox/customer-systems/{id}/bueroplus', 'BueroPlusController@save')
+        ->where('id', '[0-9]+')->name('mailboxes.customersystems.bueroplus.save');
+    Route::post('/mailbox/customer-systems/{id}/bueroplus/test', 'BueroPlusController@test')
+        ->middleware('throttle:10,1')->where('id', '[0-9]+')->name('mailboxes.customersystems.bueroplus.test');
 });

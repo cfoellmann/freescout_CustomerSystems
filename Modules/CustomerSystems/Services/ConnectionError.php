@@ -4,6 +4,27 @@ namespace Modules\CustomerSystems\Services;
 
 class ConnectionError
 {
+    public static function forBueroPlus(\Throwable $error)
+    {
+        $reason = DiagnosticLog::reason($error);
+        if ($reason === 'authentication_failed') {
+            $message = 'büro+ hat die Anmeldung abgelehnt. Client-ID, Client-Secret und den verknüpften Benutzer prüfen.';
+        } elseif ($reason === 'permission_denied') {
+            $message = 'büro+ verweigert den Zugriff. GraphQL-Freigabe des Benutzers und den Scope graphql prüfen.';
+        } elseif ($reason === 'graphql_failed') {
+            $message = 'büro+ meldet einen GraphQL-Fehler. Schema und API-Berechtigungen prüfen.';
+        } elseif ($reason === 'invalid_response') {
+            $message = 'büro+ hat eine ungültige OAuth- oder GraphQL-Antwort geliefert.';
+        } else {
+            $message = str_replace(['Shopware', 'Kunden-API'], ['büro+', 'GraphQL-API'], self::forException($error));
+            return $message;
+        }
+        if ($error instanceof ApiException) {
+            $message .= ' (HTTP '.$error->httpStatus.') Schritt: '.($error->phase === 'oauth' ? 'OAuth-Anmeldung.' : 'GraphQL-API.');
+        }
+        return $message;
+    }
+
     public static function forException(\Throwable $error)
     {
         $reason = DiagnosticLog::reason($error);

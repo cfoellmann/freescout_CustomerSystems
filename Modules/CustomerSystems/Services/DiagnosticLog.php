@@ -15,7 +15,7 @@ class DiagnosticLog
     {
         if ($error instanceof \InvalidArgumentException) { return 'validation_failed'; }
         $known = ['disabled', 'no_email', 'credentials_unreadable', 'authentication_failed', 'permission_denied',
-            'not_configured', 'curl_missing', 'too_many_matches', 'invalid_response', 'unavailable'];
+            'not_configured', 'curl_missing', 'too_many_matches', 'invalid_response', 'unavailable', 'graphql_failed'];
         return in_array($error->getMessage(), $known, true) ? $error->getMessage() : 'unexpected_error';
     }
 
@@ -52,7 +52,7 @@ class DiagnosticLog
                 $safe[$key] = max(0, (int) $context[$key]);
             }
         }
-        if (($context['system'] ?? null) === 'shopware6') {
+        if (in_array($context['system'] ?? null, ['shopware6', 'bueroplus'], true)) {
             $safe['system'] = $context['system'];
         }
         foreach (['enabled', 'debug_logging'] as $key) {

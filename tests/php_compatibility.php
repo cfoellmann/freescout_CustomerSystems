@@ -25,7 +25,10 @@ $result = $transport('search/customer', ['limit' => 1]);
 if ($result !== ['data' => []]) { throw new RuntimeException('OAuth smoke test failed'); }
 
 if (function_exists('curl_init')) {
-    foreach ([function () { (new JsonHttpClient())->post('https://127.0.0.1:1/api', [], []); }] as $request) {
+    foreach ([
+        function () { (new JsonHttpClient())->post('https://127.0.0.1:1/api', [], []); },
+        function () { (new JsonHttpClient())->postForm('https://127.0.0.1:1/token', ['grant_type' => 'client_credentials'], []); },
+    ] as $request) {
         try {
             $request();
             throw new RuntimeException('Expected refused local connection');

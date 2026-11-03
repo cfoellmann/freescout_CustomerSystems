@@ -38,6 +38,9 @@ jobs:
       - name: Check recent orders
         run: php tests/orders.php
 
+      - name: Check microtech OAuth preparation
+        run: php tests/bueroplus.php
+
       - name: Check native sidebar placement
         run: php tests/sidebar.php
 

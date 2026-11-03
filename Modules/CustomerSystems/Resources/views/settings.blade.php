@@ -56,11 +56,7 @@
                 </div></div>
             </form>
             <hr>
-            <div class="text-muted" aria-disabled="true">
-                <h3><span class="glyphicon glyphicon-link" aria-hidden="true"></span> büro+ <span class="label label-default">Noch nicht verfügbar</span></h3>
-                <p>Die ERP-Verbindung wird später ergänzt.</p>
-                <button type="button" class="btn btn-default" disabled>büro+ verbinden</button>
-            </div>
+            @include('customersystems::bueroplus_settings')
         </div></div>
     </div>
 @endsection

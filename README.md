@@ -10,7 +10,7 @@ Der native Kundenbereich von FreeScout bleibt oben. Direkt vor der ersten Sideba
 
 Bestellungen erscheinen ab 0.3.2 jeweils in einer kompakten Zeile: Bestellnummer, Datum und natives farbiges Statuslabel. Offen ist blau, in Bearbeitung orange, abgeschlossen grün und storniert rot; eigene Status bleiben neutral grau. Lange Bezeichnungen und Nummern werden gekürzt, der vollständige Wert bleibt im Tooltip lesbar. Die Farbzuordnung verwendet den technischen Bestellstatus und nicht dessen übersetzten Namen.
 
-Das Modul arbeitet lesend. Bestellungen laden getrennt nach; fehlerhafte Bestellabfragen verhindern nicht die Anzeige des Kundenprofils. büro+ ist ausgegraut als noch nicht verfügbar. Ab **0.3.0 wird ausschließlich Shopware 6 unterstützt**. Das frühere Begleitplugin und die konfigurierbare Sidebar-Überschrift entfallen.
+Das Modul arbeitet lesend. Bestellungen laden getrennt nach; fehlerhafte Bestellabfragen verhindern nicht die Anzeige des Kundenprofils. Für büro+ sind Zugangskonfiguration und Verbindungstest vorbereitet; ERP-Kundendaten werden noch nicht abgerufen. Ab **0.3.0 wird ausschließlich Shopware 6 unterstützt**. Das frühere Begleitplugin und die konfigurierbare Sidebar-Überschrift entfallen.
 
 Die Platzierung erfolgt ab 0.3.1 über den nativen Hook `conversation.before_prev_convs` nach dem Kundenprofil. Der Block wird nicht per JavaScript vor Elemente mit `conv-sidebar-block` verschoben: Diese Klasse trägt auch das native Kundenprofil, dessen Avatar einen negativen oberen Abstand verwendet. Dadurch bleibt die gemeinsame Box unterhalb des Profils und überlagert sich nicht mit dessen Bild.
 
@@ -111,6 +111,27 @@ Die Verbindungskonfiguration liegt verschlüsselt in den Postfach-Metadaten. Daf
 
 Direktlinks öffnen die Shopware-Administration in einem neuen Tab. Dort gelten Anmeldung und Rechte des jeweiligen Shopware-Benutzers. Die Integration meldet Supportmitarbeiter nicht automatisch im Admin an.
 
+## büro+ vorbereiten (microtech OAuth / GraphQL)
+
+Status: **Verbindungsvorbereitung**, noch keine E-Mail-Suche oder ERP-Anzeige in der Sidebar.
+
+Einrichtung gemäß [microtech OAuth-Dokumentation](https://hilfe.microtech.de/18_graphql/oauthapidoku/):
+
+1. Gen. 24 Enterprise ab Build 7076 mit eingerichtetem GraphQL-Endpunkt verwenden. Die HTTPS-Adresse mit DNS-Namen muss vom FreeScout-Server erreichbar sein; dessen Zertifikat muss dort vertrauenswürdig sein.
+2. Beim vorgesehenen microtech-Benutzer unter **Automatisierungs-Dienste → Informationen → Benutzer → Benutzer verwalten → Firmenvorgaben** den **Zugriff über GraphQL erlaubt** aktivieren. Dieser Benutzer bestimmt die Datenrechte; für die spätere Kundensuche passende Leserechte vorsehen.
+3. Unter **Meine Firma → Überblick → Systemeinstellungen → Anwendungen verwalten → Neu** eine Anwendung für FreeScout anlegen: Typ **Vertraulich**, den Benutzer verknüpfen, **Zugriffstokens anfordern** und **GraphQL-API Zugriff** erlauben.
+4. Generierte **Client-ID** und **Client-Secret** übernehmen. Secret vor dem Speichern sichern; es ist danach nicht erneut auslesbar.
+5. Im FreeScout-Postfach unter **Kundenprofil Abruf → büro+** die Basis-URL `https://erp.example.com/microtech/erp/<serverpfad>`, Client-ID und Secret eintragen. Kein `/token` oder `/graphql/v1` anhängen.
+6. **Verbindung testen**, anschließend separat **büro+-Zugang speichern**.
+
+Das Modul verwendet Client Credentials mit Basic-Authentifizierung am Token-Endpunkt und Scope `graphql`, anschließend Bearer am GraphQL-Endpunkt. Kein Browser-Login, Callback oder Refresh-Token erforderlich.
+
+Der Test fragt ausschließlich `__typename` ab. Ein Erfolg bestätigt OAuth und einen antwortenden GraphQL-Endpunkt, **keine Kundenleserechte oder funktionierende E-Mail-Zuordnung**. GraphQL-Fehler bei HTTP 200 gelten ebenfalls als Fehler. Keine automatischen Wiederholungen.
+
+Zugänge werden unabhängig von Shopware pro Postfach verschlüsselt gespeichert. Leeres Secret behält den gespeicherten Wert nur bei gleicher URL und Client-ID. Löschen ist separat möglich. Tokens werden nicht dauerhaft gespeichert. Nur Administratoren können speichern oder testen; Tests verändern keine Einstellungen. Beide Verbindungen nutzen getrennte Formulare.
+
+Für die nächste Ausbaustufe benötigen wir das Schema der Zielinstallation: Mandantenzuordnung, Adresstabelle, E-Mail-Felder, Filtermöglichkeiten und die gewünschten Kundenfelder. Daraus entsteht eine feste, lesende Abfrage mit begrenzter Trefferzahl. Keine geratenen Tabellen-/Feldnamen und keine frei konfigurierbaren GraphQL-Abfragen im Modul.
+
 ## Diagnose-Logging
 
 Dateien: `storage/logs/customer-systems-YYYY-MM-DD.log`, maximal 14 Tagesdateien. Rotation beim Schreiben neuer Dateien; der PHP-Benutzer benötigt Schreibrechte auf `storage/logs`.
@@ -152,6 +173,7 @@ python tools/build_release.py --tag 0.3.2 --repository cfoellmann/freescout_Cust
 ```powershell
 php tests/logging.php
 php tests/orders.php
+php tests/bueroplus.php
 php tests/sidebar.php
 php tests/php_compatibility.php
 Get-ChildItem Modules,tests -Recurse -Filter *.php | Where-Object Name -NotLike '*.blade.php' | ForEach-Object { php -l $_.FullName }

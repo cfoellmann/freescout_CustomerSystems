@@ -20,6 +20,8 @@ class OrderSummary
                 'date' => $date->format('d.m.Y'),
                 'status' => is_scalar($row['status'] ?? null) && trim((string) $row['status']) !== ''
                     ? trim((string) $row['status']) : 'Unbekannt',
+                'status_key' => is_string($row['status_key'] ?? null) && preg_match('/^[a-z][a-z0-9_]{0,79}$/D', $row['status_key'])
+                    ? $row['status_key'] : '',
                 '_timestamp' => $date->getTimestamp(),
             ];
         }

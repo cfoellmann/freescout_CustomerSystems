@@ -8,6 +8,8 @@ Der native Kundenbereich von FreeScout bleibt oben. Direkt vor der ersten Sideba
 - Darin **Letzte Bestellungen**: maximal fünf Bestellungen dieses Kunden, neueste zuerst, mit Bestellnummer, Datum, Bestellstatus und Direktlink in den Shopware-Admin. Die Liste verwendet FreeScouts native Struktur von „Vorherige Gespräche“.
 - Bei mehreren Konten derselben E-Mail erhält jeder Kunde seine eigene Bestellliste. Technische IDs werden nicht als Felder angezeigt.
 
+Bestellungen erscheinen ab 0.3.2 jeweils in einer kompakten Zeile: Bestellnummer, Datum und natives farbiges Statuslabel. Offen ist blau, in Bearbeitung orange, abgeschlossen grün und storniert rot; eigene Status bleiben neutral grau. Lange Bezeichnungen und Nummern werden gekürzt, der vollständige Wert bleibt im Tooltip lesbar. Die Farbzuordnung verwendet den technischen Bestellstatus und nicht dessen übersetzten Namen.
+
 Das Modul arbeitet lesend. Bestellungen laden getrennt nach; fehlerhafte Bestellabfragen verhindern nicht die Anzeige des Kundenprofils. büro+ ist ausgegraut als noch nicht verfügbar. Ab **0.3.0 wird ausschließlich Shopware 6 unterstützt**. Das frühere Begleitplugin und die konfigurierbare Sidebar-Überschrift entfallen.
 
 Die Platzierung erfolgt ab 0.3.1 über den nativen Hook `conversation.before_prev_convs` nach dem Kundenprofil. Der Block wird nicht per JavaScript vor Elemente mit `conv-sidebar-block` verschoben: Diese Klasse trägt auch das native Kundenprofil, dessen Avatar einen negativen oberen Abstand verwendet. Dadurch bleibt die gemeinsame Box unterhalb des Profils und überlagert sich nicht mit dessen Bild.
@@ -142,7 +144,7 @@ Für ein Release die Version in `Modules/CustomerSystems/module.json` erhöhen, 
 
 ```powershell
 python -m unittest discover -s tests -p test_release.py -v
-python tools/build_release.py --tag 0.3.1 --repository cfoellmann/freescout_CustomerSystems
+python tools/build_release.py --tag 0.3.2 --repository cfoellmann/freescout_CustomerSystems
 ```
 
 ## Entwicklung und Prüfung

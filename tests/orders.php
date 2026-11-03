@@ -1,10 +1,12 @@
 <?php
 
 require __DIR__.'/connections.php';
+require __DIR__.'/../Modules/CustomerSystems/Services/OrderPresentation.php';
 
 use Modules\CustomerSystems\Services\Shopware6Client;
 use Modules\CustomerSystems\Services\BackendLink;
 use Modules\CustomerSystems\Services\ApiException;
+use Modules\CustomerSystems\Services\OrderPresentation;
 
 $ownerId = '0123456789abcdef0123456789abcdef';
 $orderRows = [];
@@ -31,7 +33,8 @@ $orders = $client->latestOrders($ownerId, 'test@example.com');
 check(count($orders) === 5, 'Order result must be limited to five');
 check(array_column($orders, 'number') === ['ORDER-7', 'ORDER-6', 'ORDER-5', 'ORDER-4', 'ORDER-3'], 'Order sorting incorrect');
 check($orders[0]['status'] === 'Offen' && $orders[0]['date'] === '07.11.2026', 'Status or date normalization failed');
-check(array_keys($orders[0]) === ['id', 'number', 'date', 'status'], 'Order payload allowlist failed');
+check(array_keys($orders[0]) === ['id', 'number', 'date', 'status', 'status_key'], 'Order payload allowlist failed');
+check($orders[0]['status_key'] === 'open', 'Stable status key missing');
 check(strpos(json_encode($orders), 'do-not-expose') === false, 'Order response leaked unneeded fields');
 $row = $orderRows[0];
 foreach ([
@@ -55,4 +58,10 @@ $base = 'https://shop.example.com/sub/admin';
 check(BackendLink::order($base, $orders[0]['id']) === $base.'#/sw/order/detail/'.$orders[0]['id'].'/general', 'Order admin link wrong');
 check(BackendLink::order($base, '123') === null, 'Invalid order ID accepted');
 check(BackendLink::order('javascript:alert(1)', $orders[0]['id']) === null, 'Unsafe order link accepted');
+check(OrderPresentation::status(['status_key' => 'completed', 'status' => 'Completed'])['class'] === 'label-success', 'Translated completion must retain colour');
+check(OrderPresentation::status(['status_key' => 'in_progress', 'status' => 'In Bearbeitung'])['label'] === 'In Arb.', 'Long standard status must be abbreviated');
+check(OrderPresentation::status(['status_key' => 'cancelled', 'status' => 'Storniert'])['class'] === 'label-danger', 'Cancelled order colour wrong');
+check(OrderPresentation::status(['status_key' => 'custom', 'status' => 'Abgeschlossen'])['class'] === 'label-default', 'Custom states must not inherit a misleading colour by name');
+check(OrderPresentation::compact('ÄÖÜ1234567890', 10) === 'ÄÖÜ123456…', 'Unicode order numbers must truncate safely');
+check(OrderPresentation::compact('413280', 10) === '413280', 'Short order numbers must stay intact');
 echo 'OK: '.$passed." checks including order ownership, ordering and links passed\n";

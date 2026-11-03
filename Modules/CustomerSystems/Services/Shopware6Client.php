@@ -110,7 +110,8 @@ class Shopware6Client
             $state = is_array($row['stateMachineState'] ?? null) ? $row['stateMachineState'] : [];
             $rows[] = ['id' => strtolower($row['id']), 'number' => $row['orderNumber'] ?? '',
                 'ordered_at' => $row['orderDateTime'] ?? '',
-                'status' => $state['translated']['name'] ?? $state['name'] ?? $state['technicalName'] ?? 'Unbekannt'];
+                'status' => $state['translated']['name'] ?? $state['name'] ?? $state['technicalName'] ?? 'Unbekannt',
+                'status_key' => $state['technicalName'] ?? ''];
         }
         return OrderSummary::latest($rows);
     }
